@@ -1,0 +1,577 @@
+#+TITLE: Transducers in MLPL
+#+SUBTITLE: one reusable algorithm, any source, any sink -- built from partial application
+#+AUTHOR: MLPL
+#+OPTIONS: toc:2 num:t
+#+PROPERTY: header-args:mlpl :session transducers :results output :exports both :tangle transducers.mlpl
+
+A /transducer/ is Clojure's name for a transformation of a reduction
+that knows nothing about where its inputs come from or where its result
+goes. "Square the odd numbers" is the same algorithm whether the numbers
+arrive as an array, as lines of a file, or in chunks off a socket, and
+whether the answer is a sum, a count, a vector, or a histogram. A
+transducer captures exactly that algorithm, once, and composes with
+others like ordinary functions.
+
+This document builds transducers in MLPL from two language features --
+records and partial application -- and then uses them four ways:
+
+1. one pipeline reused with many reducers;
+2. one pipeline reused over many sources, including a chunked stream;
+3. a data-cleaning pipeline feeding streaming statistics;
+4. a side-by-side with MLPL's own whole-array idiom, with timings.
+
+Every block is live: the output beneath it is what MLPL printed.
+
+* The idea in one paragraph
+
+A /reducing function/ ~rf(acc, x)~ folds one more input ~x~ into an
+accumulator ~acc~: addition for a sum, "append" for a list. A transducer
+~xf~ is a function from reducing function to reducing function:
+~xf(rf)~ is a new ~rf~ that does some work before (or instead of)
+calling the old one. /Mapping/ ~f~ turns ~rf~ into "call ~rf~ with
+~f(x)~". /Filtering/ by ~p~ turns it into "call ~rf~ only when ~p(x)~".
+Because a transducer only ever sees ~rf~, it never builds an
+intermediate collection: ~map~ then ~filter~ then ~sum~ is one pass with
+no temporary arrays, and the same ~xf~ drives any ~rf~.
+
+* Building blocks
+
+** Functions as values
+
+MLPL has no closures, but it has /partial application/. ~call(f, a)~
+with fewer arguments than ~f~ takes returns a /partial/ -- the function
+plus its bound arguments, as data. Calling the partial later supplies
+the rest:
+
+#+begin_src mlpl
+def u:add(acc, x) {
+  "The sum reducer: fold `x` into `acc` by addition."
+  acc + x
+}
+add5 = call(:u:add, 5)
+print(type_of(add5))
+call(add5, 10)
+#+end_src
+
+#+RESULTS:
+: partial
+: 15
+
+That is everything a transducer needs: ~mapping(f, rf, acc, x)~ written
+as a four-argument function becomes, after ~call(:u:mapping, f)~, a
+transducer waiting for its ~rf~, and after that a reducing function
+waiting for ~acc~ and ~x~.
+
+** A reducing function is a record of three steps
+
+Clojure reducing functions have three arities: start, step, and
+completion. The extra two matter for /stateful/ transducers (~taking~
+below needs a counter, which it keeps inside the accumulator and must
+strip off at the end). In MLPL a reducing function is a record of three
+callables:
+
+- ~start(init)~ -- prepare the initial accumulator,
+- ~step(acc, x)~ -- fold one input,
+- ~done(acc)~ -- turn the final accumulator into the result.
+
+Most reducers only have a ~step~, so ~u:reducer~ fills in identities:
+
+#+begin_src mlpl
+def u:id(x) {
+  "Identity: returns `x` unchanged (the default start / done step)."
+  x
+}
+def u:reducer(step) {
+  "A reducing-function record for a two-argument `step`, with no start or done work."
+  {start: :u:id, step: step, done: :u:id}
+}
+sum_rf = u:reducer(:u:add)
+call(sum_rf.step, 3, 4)
+#+end_src
+
+#+RESULTS:
+: 7
+
+** Early termination: ~reduced~
+
+A reducer can say "I have my answer, stop feeding me" by wrapping its
+accumulator in a marker record. The driving loop checks for it after
+every step. (Clojure calls this ~reduced~.)
+
+#+begin_src mlpl
+def u:reduced(acc) {
+  "Mark `acc` as final: the fold stops after the step that returned this."
+  {reduced: 1, value: acc}
+}
+def u:is_reduced(a) {
+  "1 when `a` is a `reduced` marker, else 0."
+  if str_eq(type_of(a), "record") {
+    has_field(a, "reduced")
+  } else {
+    0
+  }
+}
+def u:unreduced(a) {
+  "The accumulator inside a `reduced` marker, or `a` itself."
+  if u:is_reduced(a) {
+    a.value
+  } else {
+    a
+  }
+}
+u:unreduced(u:reduced(42))
+#+end_src
+
+#+RESULTS:
+: 42
+
+** Folding over any source
+
+A /source/ only has to answer two questions: how many items, and what is
+item ~i~. Arrays answer with their leading axis (so a matrix yields its
+rows), string lists with ~list_len~ / ~list_get~. ~u:fold~ is the only
+loop in this document; note that ~and~ / ~not~ short-circuit, so
+~u:is_reduced~ is checked only while items remain.
+
+#+begin_src mlpl
+def u:size(coll) {
+  "Item count: list length for a string list, leading-axis length for an array."
+  if str_eq(type_of(coll), "string-list") {
+    list_len(coll)
+  } else {
+    at(shape(coll), 0)
+  }
+}
+def u:item(coll, i) {
+  "Item `i`: a string, a vector element, or (rank >= 2) a row."
+  if str_eq(type_of(coll), "string-list") {
+    unwrap(list_get(coll, i))
+  } else {
+    if rank(coll) == 1 {
+      at(coll, i)
+    } else {
+      take(coll, 0, i)
+    }
+  }
+}
+def u:fold(step, acc, coll) {
+  "Fold `step` over `coll` from `acc`, stopping early at a `reduced` marker."
+  i = 0
+  n = u:size(coll)
+  while i < n and not u:is_reduced(acc) {
+    acc = call(step, acc, u:item(coll, i))
+    i = i + 1
+  }
+  acc
+}
+def u:transduce(xf, rf, init, coll) {
+  "Run transducer `xf` over `coll` into reducer `rf`, starting from `init`."
+  r = call(xf, rf)
+  acc = u:fold(r.step, call(r.start, init), coll)
+  call(r.done, u:unreduced(acc))
+}
+u:transduce(:u:id, sum_rf, 0, [1, 2, 3, 4])
+#+end_src
+
+#+RESULTS:
+: 10
+
+The identity transducer ~:u:id~ leaves ~rf~ alone, so that is a plain
+sum.
+
+* The transducers
+
+** ~mapping~ and ~filtering~
+
+Each transducer is a /step wrapper/ plus a constructor that rebuilds the
+reducer record around it. The step wrappers take their configuration
+first (~f~, ~p~) and the wrapped ~step~ second, so a partial over the
+first one or two arguments is exactly the shape needed.
+
+#+begin_src mlpl
+def u:map_step(f, step, acc, x) {
+  "Mapping's step: pass `f(x)` on to the wrapped `step`."
+  call(step, acc, call(f, x))
+}
+def u:mapping(f, rf) {
+  "Transducer: apply `f` to every input before `rf` sees it."
+  {start: rf.start, step: call(:u:map_step, f, rf.step), done: rf.done}
+}
+def u:filter_step(p, step, acc, x) {
+  "Filtering's step: pass `x` on only when `p(x)` is nonzero."
+  if call(p, x) {
+    call(step, acc, x)
+  } else {
+    acc
+  }
+}
+def u:filtering(p, rf) {
+  "Transducer: keep only the inputs where `p` is nonzero."
+  {start: rf.start, step: call(:u:filter_step, p, rf.step), done: rf.done}
+}
+def u:sq(x) {
+  "`x` squared."
+  x * x
+}
+def u:is_odd(x) {
+  "1 when `x` is an odd integer."
+  x - 2 * floor(x / 2) == 1
+}
+u:transduce(call(:u:mapping, :u:sq), sum_rf, 0, [1, 2, 3])
+#+end_src
+
+#+RESULTS:
+: 14
+
+** Composition
+
+Composing transducers is composing functions: ~comp(a, b)~ applied to
+~rf~ is ~a(b(rf))~. Inputs flow through ~a~ first, then ~b~ -- the
+left-to-right order you read the pipeline in.
+
+#+begin_src mlpl
+def u:comp_xf(outer, inner, rf) {
+  "Apply `inner` to `rf`, then `outer` to the result."
+  call(outer, call(inner, rf))
+}
+def u:comp(outer, inner) {
+  "Transducer: `outer`, then `inner` (inputs flow through `outer` first)."
+  call(:u:comp_xf, outer, inner)
+}
+odd_squares = u:comp(call(:u:filtering, :u:is_odd), call(:u:mapping, :u:sq))
+u:transduce(odd_squares, sum_rf, 0, iota(10))
+#+end_src
+
+#+RESULTS:
+: 165
+
+$1 + 9 + 25 + 49 + 81 = 165$, in one pass, with no array of odd numbers
+and no array of squares ever built.
+
+** ~taking~: a stateful transducer with early exit
+
+~taking(n)~ passes the first ~n~ inputs and then stops the whole fold.
+It needs a counter, and MLPL partials are immutable data, so the counter
+lives /in the accumulator/: ~start~ wraps the downstream accumulator as
+~{inner, left}~, ~step~ counts down and returns ~reduced~ when it hits
+zero, and ~done~ unwraps. This is what the three-step reducer record is
+for.
+
+#+begin_src mlpl
+def u:take_start(n, start, init) {
+  "Taking's start: wrap the downstream accumulator with the count left."
+  {inner: call(start, init), left: n}
+}
+def u:take_step(step, st, x) {
+  "Taking's step: fold `x`, count down, and stop at zero (or when downstream stops)."
+  inner = call(step, st.inner, x)
+  next = {inner: u:unreduced(inner), left: st.left - 1}
+  if next.left <= 0 or u:is_reduced(inner) {
+    u:reduced(next)
+  } else {
+    next
+  }
+}
+def u:take_done(done, st) {
+  "Taking's done: unwrap and finish downstream."
+  call(done, st.inner)
+}
+def u:taking(n, rf) {
+  "Transducer: pass the first `n` inputs (n >= 1), then stop the fold."
+  {start: call(:u:take_start, n, rf.start), step: call(:u:take_step, rf.step), done: call(:u:take_done, rf.done)}
+}
+first3 = u:comp(odd_squares, call(:u:taking, 3))
+u:transduce(first3, sum_rf, 0, iota(1000000))
+#+end_src
+
+#+RESULTS:
+: 35
+
+$1 + 9 + 25 = 35$. The source has a million items, but the fold stopped
+after the sixth (the third odd one): ~reduced~ propagates out through
+~mapping~ and ~filtering~ untouched, because they just return whatever
+the inner step returned.
+
+** ~catting~: one input, many outputs
+
+~catting~ treats each input as a collection and feeds its items through
+one at a time -- flatten, as a transducer. It reuses ~u:fold~, so a
+~reduced~ from downstream stops the inner loop and is returned as-is,
+which then stops the outer one.
+
+#+begin_src mlpl
+def u:cat_step(step, acc, xs) {
+  "Catting's step: fold every item of the input `xs` into `acc`."
+  u:fold(step, acc, xs)
+}
+def u:catting(rf) {
+  "Transducer: each input is a collection; pass its items on one by one."
+  {start: rf.start, step: call(:u:cat_step, rf.step), done: rf.done}
+}
+grid = reshape(iota(6), [3, 2])
+u:transduce(:u:catting, sum_rf, 0, grid)
+#+end_src
+
+#+RESULTS:
+: 15
+
+* Benefit 1: one pipeline, many reducers
+
+The pipeline ~odd_squares~ was written once. Here it feeds five
+different reducers -- a sum, a count, a maximum, a collected vector,
+and a string -- with no change to the pipeline itself:
+
+#+begin_src mlpl
+def u:count_step(acc, x) {
+  "The count reducer: one more input seen."
+  acc + 1
+}
+def u:max_step(acc, x) {
+  "The maximum reducer."
+  if x > acc {
+    x
+  } else {
+    acc
+  }
+}
+def u:conj(acc, x) {
+  "The collect reducer: append `x` to the vector `acc`."
+  concat(acc, [x], 0)
+}
+def u:join_step(acc, x) {
+  "The join reducer: append `x` to the string `acc`, comma-separated."
+  if str_len(acc) == 0 {
+    format("{}", x)
+  } else {
+    format("{}, {}", acc, x)
+  }
+}
+xs = iota(10)
+print(u:transduce(odd_squares, sum_rf, 0, xs))
+print(u:transduce(odd_squares, u:reducer(:u:count_step), 0, xs))
+print(u:transduce(odd_squares, u:reducer(:u:max_step), -1, xs))
+print(u:transduce(odd_squares, u:reducer(:u:conj), [], xs))
+joined = u:transduce(odd_squares, u:reducer(:u:join_step), "", xs)
+joined
+#+end_src
+
+#+RESULTS:
+: 165
+: 5
+: 81
+: 1 9 25 49 81
+: 1, 9, 25, 49, 81
+
+The algorithm (keep the odd ones, square them) and the destination (sum,
+count, max, vector, text) are independent pieces. With ordinary
+whole-collection functions each destination would need the pipeline
+rewritten around it, or an intermediate vector built first.
+
+* Benefit 2: one pipeline, many sources
+
+The source is just as independent. The same ~u:transduce~ runs over a
+string list -- here, the total length of the words longer than four
+letters:
+
+#+begin_src mlpl
+def u:longer_than_4(w) {
+  "1 when the string `w` has more than four characters."
+  str_len(w) > 4
+}
+words = ["map", "filter", "reduce", "fold", "transduce", "comp"]
+long_chars = u:comp(call(:u:filtering, :u:longer_than_4), call(:u:mapping, :str_len))
+print(u:transduce(long_chars, sum_rf, 0, words))
+u:transduce(long_chars, u:reducer(:u:conj), [], words)
+#+end_src
+
+#+RESULTS:
+: 21
+: 6 6 9
+
+(~:str_len~ is a builtin reference -- builtins are callables too.)
+
+** A chunked stream, in constant memory
+
+Real streams arrive in pieces: ~read_stdin_chunk(n)~ returns
+~ok({bytes, eof})~ one buffer at a time, and a socket or a file read
+with an offset behaves the same way. A transducer does not care: fold
+each chunk into the same accumulator, and only one chunk is ever in
+memory. Below, ~u:chunk(i)~ stands in for the stream -- chunk ~i~ is the
+next thousand integers -- so the example runs anywhere:
+
+#+begin_src mlpl
+def u:chunk(i) {
+  "Stand-in stream: chunk `i` is the integers 1000 * i .. 1000 * i + 999."
+  iota(1000) + 1000 * i
+}
+def u:transduce_chunks(xf, rf, init, nchunks) {
+  "Run `xf` into `rf` over `nchunks` chunks of the stream, one chunk in memory at a time."
+  r = call(xf, rf)
+  acc = call(r.start, init)
+  c = 0
+  while c < nchunks and not u:is_reduced(acc) {
+    acc = u:fold(r.step, acc, u:chunk(c))
+    c = c + 1
+  }
+  call(r.done, u:unreduced(acc))
+}
+streamed = u:transduce_chunks(odd_squares, sum_rf, 0, 20)
+streamed
+#+end_src
+
+#+RESULTS:
+: 1333333330000
+
+That is the sum of the odd squares below 20,000, computed without ever
+holding the 20,000 numbers -- and with ~taking~ in the pipeline, the
+loop would stop reading chunks as soon as it had enough. Swapping
+~u:chunk(c)~ for ~(read_stdin_chunk(4096)?).bytes~ (and testing ~eof~)
+turns this into a constant-memory filter over piped input.
+
+* Benefit 3: clean once, measure many ways
+
+Data cleaning is a pipeline; statistics are reducers. Keep them apart
+and both are reusable. The cleaning transducer drops missing values
+(~NaN~ is never equal to itself) and out-of-range readings, then
+rescales to $[0, 1]$:
+
+#+begin_src mlpl
+def u:is_valid(x) {
+  "1 when `x` is a number (not NaN) within the sensor range [0, 50]."
+  x == x and x >= 0 and x <= 50
+}
+def u:to_unit(x) {
+  "Rescale a reading from [0, 50] to [0, 1]."
+  x / 50
+}
+clean = u:comp(call(:u:filtering, :u:is_valid), call(:u:mapping, :u:to_unit))
+readings = [12, 0 / 0, 31, 47, -3, 25, 999, 40, 0 / 0, 5]
+u:transduce(clean, u:reducer(:u:conj), [], readings)
+#+end_src
+
+#+RESULTS:
+: 0.24 0.62 0.94 0.5 0.8 0.1
+
+The first reducer is Welford's streaming mean and variance: one pass,
+numerically stable, constant memory -- a record accumulator, with a
+~done~ step that turns the running sums into the answer. (Record
+destructuring keeps the update readable.)
+
+#+begin_src mlpl
+def u:welford_step(s, x) {
+  "Welford's update: fold `x` into the running count, mean, and sum of squared deviations."
+  {n, mean, m2} = s
+  n1 = n + 1
+  d = x - mean
+  mean1 = mean + d / n1
+  {n: n1, mean: mean1, m2: m2 + d * (x - mean1)}
+}
+def u:welford_done(s) {
+  "Finish Welford: the count, the mean, and the population variance."
+  {n, mean, m2} = s
+  {n: n, mean: mean, var: m2 / n}
+}
+stats_rf = {start: :u:id, step: :u:welford_step, done: :u:welford_done}
+stats = u:transduce(clean, stats_rf, {n: 0, mean: 0, m2: 0}, readings)
+format("n = {:d}, mean = {:.4f}, var = {:.4f}", stats.n, stats.mean, stats.var)
+#+end_src
+
+#+RESULTS:
+: n = 6, mean = 0.5333, var = 0.0865
+
+The second reducer is a four-bin histogram, configured by partial
+application (the bin count is bound first). Same cleaning transducer,
+untouched:
+
+#+begin_src mlpl
+def u:hist_step(k, counts, x) {
+  "Histogram step: add one to the bin of `x` in [0, 1] (the top edge joins the last bin)."
+  bin = floor(x * k) - (x >= 1)
+  counts + (iota(k) == bin)
+}
+hist = u:transduce(clean, u:reducer(call(:u:hist_step, 4)), zeros([4]), readings)
+hist
+#+end_src
+
+#+RESULTS:
+: 2 0 2 2
+
+Six of the ten readings survive cleaning; both the statistics and the
+histogram see exactly those seven, because they share one definition of
+"clean".
+
+* Benefit 4 -- and the honest limit: the array idiom
+
+MLPL is an array language, and for data that is already one array in
+memory its native idiom is a mask and a reduction:
+
+#+begin_src mlpl
+v = iota(10)
+odd = v - 2 * floor(v / 2) == 1
+reduce_add(compress(odd, v) * compress(odd, v))
+#+end_src
+
+#+RESULTS:
+: 165
+
+That is the same 165 as ~odd_squares~ into ~sum_rf~. Two things are
+worth knowing about it.
+
+First, a mask is not always enough. The tempting ~reduce_add(mask *
+data)~ is /wrong/ for the cleaning example: ~0 * NaN~ is still ~NaN~, so
+one missing value poisons the whole sum. ~compress(mask, data)~ --
+selecting instead of zeroing -- is the correct array-idiom filter:
+
+#+begin_src mlpl
+ok = readings == readings and readings >= 0 and readings <= 50
+print(reduce_add(ok * readings))
+reduce_add(compress(ok, readings))
+#+end_src
+
+#+RESULTS:
+: NaN
+: 160
+
+Second, speed. On this interpreter the whole-array form is the clear
+winner for in-memory data: one ~compress~ and one ~reduce_add~ run as
+native loops, while a transducer makes several interpreted function
+calls per item. Measured on 100,000 integers (release build, one core):
+
+| form                                        | time    |
+|---------------------------------------------+---------|
+| ~compress~ + ~reduce_add~ (whole array)     | 0.01 s  |
+| transducer over one 100,000-item array      | 15.9 s  |
+| index loop over 100 chunks of 1,000         | 0.28 s  |
+| index loop over one 100,000-item array      | 6.4 s   |
+
+The last two rows explain the second: reading item ~i~ of an array with
+~at(v, i)~ copies the argument, so an item-at-a-time loop over one huge
+array is quadratic here. Over chunks the same loop is linear -- which is
+exactly how a transducer meets a stream.
+
+So the division of labour is:
+
+- *Whole arrays already in memory:* use masks, ~compress~, and
+  reductions. They are faster and just as clear.
+- *Streams, early exit, and reuse:* use transducers. Data that arrives
+  in chunks, pipelines that should stop as soon as they have an answer
+  (~taking~), and algorithms that must be written once and pointed at
+  many sources and sinks are where separating "what to do to each item"
+  from "where items come from" and "what to build" pays off.
+
+* Summary
+
+| piece          | MLPL form                                              |
+|----------------+--------------------------------------------------------|
+| reducer        | record ~{start, step, done}~ of callables              |
+| transducer     | partial ~call(:u:mapping, f)~ -- a function of a reducer |
+| composition    | ~u:comp(a, b)~ -- a partial of ~u:comp_xf~             |
+| early exit     | ~u:reduced(acc)~ marker, checked by ~u:fold~           |
+| stateful step  | state carried in the accumulator, unwrapped by ~done~  |
+| source         | anything ~u:size~ / ~u:item~ understand, or chunks     |
+
+Two language features did all the work: partial application, which
+turns a many-argument function into a value waiting for the rest of its
+arguments, and records, which bundle the three steps of a reducer (and
+any state a stateful transducer needs) into one value. Neither closures
+nor mutable state were required.

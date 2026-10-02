@@ -204,7 +204,12 @@ its 007 frame-snapshot-cost is the narrow half of request 5 / issue e).
    Output polish: right-align matrix columns when printed (`11 10 9 8`
    rows do not line up), print IEEE negative zero as `0`, and script
    mode should not echo the final value when it is a `print(...)`
-   call (the output appears twice).
+   call (the output appears twice). From the transducers literate doc
+   (2026-10-02): `else if` chains are a parse error ("unexpected token
+   'if'") -- Python's `elif` reflex; accept `else if` as sugar for a
+   nested `else { if ... }`. `at(m, i)` on a rank-2 array reports
+   "shape mismatch: 3 vs 3 elements"; say it wants a vector (or point
+   at `take(m, 0, i)` for a row).
 3. **tensor-indexing** -- `gather(x, idx[, axis])` (incl. rank-1
    vectors: `gather_rows` rejects them today and `at(v, [i, j])` rejects
    vector indices), `slice(x, lo, hi[, axis])` (half-open) and
@@ -223,6 +228,9 @@ its 007 frame-snapshot-cost is the narrow half of request 5 / issue e).
    today); `partition(mask, v)` / cut (split a vector at a mask --
    Max Consecutive Ones 1a is marked not-expressible without it).
    Strings as character arrays are lists-and-text's `codepoints`.
+   Also (transducers literate doc, 2026-10-02): elementwise `max(a, b)`
+   / `min(a, b)` and `reduce_max` / `reduce_min` -- none exist; the doc
+   writes a `u:max_step` with `if`.
 4. **param-groups** -- `p = param_init({wte: [V, d], ...}, seed, std)`
    declares + seeds each named param (per-leaf seeds derived from
    `seed`) and returns a NAME group accepted by `adam` / `grad` /
@@ -237,6 +245,12 @@ its 007 frame-snapshot-cost is the narrow half of request 5 / issue e).
    the value/env crates: benchmark first (microgpt-mlpl
    docs/benchmarks.md numbers), land behind the other sagas' tests.
    May be promoted ahead of 3-5 if read cost becomes blocking.
+   Evidence (transducers literate doc, 2026-10-02, release build): an
+   index loop `acc = acc + at(v, i)` is QUADRATIC because each call
+   copies `v` -- 0.28 s at 20k items, 6.4 s at 100k (the same 100k as
+   100 chunks of 1k: 0.28 s); a transducer over one 100k array takes
+   15.9 s vs 0.01 s for `compress` + `reduce_add`. Any element-at-a-time
+   algorithm (folds, scans, parsers) hits this.
 
 Declined or redirected: `where(x, cond)` as compress (collides with
 NumPy's `np.where(cond, a, b)`; if added, use NumPy semantics);

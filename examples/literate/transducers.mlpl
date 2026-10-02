@@ -1,0 +1,259 @@
+def u:add(acc, x) {
+  "The sum reducer: fold `x` into `acc` by addition."
+  acc + x
+}
+add5 = call(:u:add, 5)
+print(type_of(add5))
+call(add5, 10)
+
+def u:id(x) {
+  "Identity: returns `x` unchanged (the default start / done step)."
+  x
+}
+def u:reducer(step) {
+  "A reducing-function record for a two-argument `step`, with no start or done work."
+  {start: :u:id, step: step, done: :u:id}
+}
+sum_rf = u:reducer(:u:add)
+call(sum_rf.step, 3, 4)
+
+def u:reduced(acc) {
+  "Mark `acc` as final: the fold stops after the step that returned this."
+  {reduced: 1, value: acc}
+}
+def u:is_reduced(a) {
+  "1 when `a` is a `reduced` marker, else 0."
+  if str_eq(type_of(a), "record") {
+    has_field(a, "reduced")
+  } else {
+    0
+  }
+}
+def u:unreduced(a) {
+  "The accumulator inside a `reduced` marker, or `a` itself."
+  if u:is_reduced(a) {
+    a.value
+  } else {
+    a
+  }
+}
+u:unreduced(u:reduced(42))
+
+def u:size(coll) {
+  "Item count: list length for a string list, leading-axis length for an array."
+  if str_eq(type_of(coll), "string-list") {
+    list_len(coll)
+  } else {
+    at(shape(coll), 0)
+  }
+}
+def u:item(coll, i) {
+  "Item `i`: a string, a vector element, or (rank >= 2) a row."
+  if str_eq(type_of(coll), "string-list") {
+    unwrap(list_get(coll, i))
+  } else {
+    if rank(coll) == 1 {
+      at(coll, i)
+    } else {
+      take(coll, 0, i)
+    }
+  }
+}
+def u:fold(step, acc, coll) {
+  "Fold `step` over `coll` from `acc`, stopping early at a `reduced` marker."
+  i = 0
+  n = u:size(coll)
+  while i < n and not u:is_reduced(acc) {
+    acc = call(step, acc, u:item(coll, i))
+    i = i + 1
+  }
+  acc
+}
+def u:transduce(xf, rf, init, coll) {
+  "Run transducer `xf` over `coll` into reducer `rf`, starting from `init`."
+  r = call(xf, rf)
+  acc = u:fold(r.step, call(r.start, init), coll)
+  call(r.done, u:unreduced(acc))
+}
+u:transduce(:u:id, sum_rf, 0, [1, 2, 3, 4])
+
+def u:map_step(f, step, acc, x) {
+  "Mapping's step: pass `f(x)` on to the wrapped `step`."
+  call(step, acc, call(f, x))
+}
+def u:mapping(f, rf) {
+  "Transducer: apply `f` to every input before `rf` sees it."
+  {start: rf.start, step: call(:u:map_step, f, rf.step), done: rf.done}
+}
+def u:filter_step(p, step, acc, x) {
+  "Filtering's step: pass `x` on only when `p(x)` is nonzero."
+  if call(p, x) {
+    call(step, acc, x)
+  } else {
+    acc
+  }
+}
+def u:filtering(p, rf) {
+  "Transducer: keep only the inputs where `p` is nonzero."
+  {start: rf.start, step: call(:u:filter_step, p, rf.step), done: rf.done}
+}
+def u:sq(x) {
+  "`x` squared."
+  x * x
+}
+def u:is_odd(x) {
+  "1 when `x` is an odd integer."
+  x - 2 * floor(x / 2) == 1
+}
+u:transduce(call(:u:mapping, :u:sq), sum_rf, 0, [1, 2, 3])
+
+def u:comp_xf(outer, inner, rf) {
+  "Apply `inner` to `rf`, then `outer` to the result."
+  call(outer, call(inner, rf))
+}
+def u:comp(outer, inner) {
+  "Transducer: `outer`, then `inner` (inputs flow through `outer` first)."
+  call(:u:comp_xf, outer, inner)
+}
+odd_squares = u:comp(call(:u:filtering, :u:is_odd), call(:u:mapping, :u:sq))
+u:transduce(odd_squares, sum_rf, 0, iota(10))
+
+def u:take_start(n, start, init) {
+  "Taking's start: wrap the downstream accumulator with the count left."
+  {inner: call(start, init), left: n}
+}
+def u:take_step(step, st, x) {
+  "Taking's step: fold `x`, count down, and stop at zero (or when downstream stops)."
+  inner = call(step, st.inner, x)
+  next = {inner: u:unreduced(inner), left: st.left - 1}
+  if next.left <= 0 or u:is_reduced(inner) {
+    u:reduced(next)
+  } else {
+    next
+  }
+}
+def u:take_done(done, st) {
+  "Taking's done: unwrap and finish downstream."
+  call(done, st.inner)
+}
+def u:taking(n, rf) {
+  "Transducer: pass the first `n` inputs (n >= 1), then stop the fold."
+  {start: call(:u:take_start, n, rf.start), step: call(:u:take_step, rf.step), done: call(:u:take_done, rf.done)}
+}
+first3 = u:comp(odd_squares, call(:u:taking, 3))
+u:transduce(first3, sum_rf, 0, iota(1000000))
+
+def u:cat_step(step, acc, xs) {
+  "Catting's step: fold every item of the input `xs` into `acc`."
+  u:fold(step, acc, xs)
+}
+def u:catting(rf) {
+  "Transducer: each input is a collection; pass its items on one by one."
+  {start: rf.start, step: call(:u:cat_step, rf.step), done: rf.done}
+}
+grid = reshape(iota(6), [3, 2])
+u:transduce(:u:catting, sum_rf, 0, grid)
+
+def u:count_step(acc, x) {
+  "The count reducer: one more input seen."
+  acc + 1
+}
+def u:max_step(acc, x) {
+  "The maximum reducer."
+  if x > acc {
+    x
+  } else {
+    acc
+  }
+}
+def u:conj(acc, x) {
+  "The collect reducer: append `x` to the vector `acc`."
+  concat(acc, [x], 0)
+}
+def u:join_step(acc, x) {
+  "The join reducer: append `x` to the string `acc`, comma-separated."
+  if str_len(acc) == 0 {
+    format("{}", x)
+  } else {
+    format("{}, {}", acc, x)
+  }
+}
+xs = iota(10)
+print(u:transduce(odd_squares, sum_rf, 0, xs))
+print(u:transduce(odd_squares, u:reducer(:u:count_step), 0, xs))
+print(u:transduce(odd_squares, u:reducer(:u:max_step), -1, xs))
+print(u:transduce(odd_squares, u:reducer(:u:conj), [], xs))
+joined = u:transduce(odd_squares, u:reducer(:u:join_step), "", xs)
+joined
+
+def u:longer_than_4(w) {
+  "1 when the string `w` has more than four characters."
+  str_len(w) > 4
+}
+words = ["map", "filter", "reduce", "fold", "transduce", "comp"]
+long_chars = u:comp(call(:u:filtering, :u:longer_than_4), call(:u:mapping, :str_len))
+print(u:transduce(long_chars, sum_rf, 0, words))
+u:transduce(long_chars, u:reducer(:u:conj), [], words)
+
+def u:chunk(i) {
+  "Stand-in stream: chunk `i` is the integers 1000 * i .. 1000 * i + 999."
+  iota(1000) + 1000 * i
+}
+def u:transduce_chunks(xf, rf, init, nchunks) {
+  "Run `xf` into `rf` over `nchunks` chunks of the stream, one chunk in memory at a time."
+  r = call(xf, rf)
+  acc = call(r.start, init)
+  c = 0
+  while c < nchunks and not u:is_reduced(acc) {
+    acc = u:fold(r.step, acc, u:chunk(c))
+    c = c + 1
+  }
+  call(r.done, u:unreduced(acc))
+}
+streamed = u:transduce_chunks(odd_squares, sum_rf, 0, 20)
+streamed
+
+def u:is_valid(x) {
+  "1 when `x` is a number (not NaN) within the sensor range [0, 50]."
+  x == x and x >= 0 and x <= 50
+}
+def u:to_unit(x) {
+  "Rescale a reading from [0, 50] to [0, 1]."
+  x / 50
+}
+clean = u:comp(call(:u:filtering, :u:is_valid), call(:u:mapping, :u:to_unit))
+readings = [12, 0 / 0, 31, 47, -3, 25, 999, 40, 0 / 0, 5]
+u:transduce(clean, u:reducer(:u:conj), [], readings)
+
+def u:welford_step(s, x) {
+  "Welford's update: fold `x` into the running count, mean, and sum of squared deviations."
+  {n, mean, m2} = s
+  n1 = n + 1
+  d = x - mean
+  mean1 = mean + d / n1
+  {n: n1, mean: mean1, m2: m2 + d * (x - mean1)}
+}
+def u:welford_done(s) {
+  "Finish Welford: the count, the mean, and the population variance."
+  {n, mean, m2} = s
+  {n: n, mean: mean, var: m2 / n}
+}
+stats_rf = {start: :u:id, step: :u:welford_step, done: :u:welford_done}
+stats = u:transduce(clean, stats_rf, {n: 0, mean: 0, m2: 0}, readings)
+format("n = {:d}, mean = {:.4f}, var = {:.4f}", stats.n, stats.mean, stats.var)
+
+def u:hist_step(k, counts, x) {
+  "Histogram step: add one to the bin of `x` in [0, 1] (the top edge joins the last bin)."
+  bin = floor(x * k) - (x >= 1)
+  counts + (iota(k) == bin)
+}
+hist = u:transduce(clean, u:reducer(call(:u:hist_step, 4)), zeros([4]), readings)
+hist
+
+v = iota(10)
+odd = v - 2 * floor(v / 2) == 1
+reduce_add(compress(odd, v) * compress(odd, v))
+
+ok = readings == readings and readings >= 0 and readings <= 50
+print(reduce_add(ok * readings))
+reduce_add(compress(ok, readings))

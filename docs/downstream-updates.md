@@ -72,9 +72,9 @@ the heaviest users (line counts over downstream `.mlpl`):
 | Saga | Adds | Retires | Heaviest users |
 |---|---|---|---|
 | readable-scripts | `format(...)` (Python format specs), `write(s)`, variadic `str_concat`, `and` / `or` / `not`, record destructuring | `str_concat(str_concat(` towers; `* (1 - done)` booleans; field-by-field unpacking; hand-rolled `{:4d}` formatters | moe-microscope 226, demo-decision-model 44, demo-abstract-algebra 40 nested concats |
-| diagnostics-and-repl | `file:line:col` for the failing inner statement; mlpl-mode keywords; `include` in `--babel-session`; REPL line editing, multi-line blocks and `include` at the prompt; aligned matrix printing | bisecting silent-position errors; duplicated `lib/` in literate docs; `rlwrap` around the REPL | all |
+| diagnostics-and-repl | `file:line:col` for the failing inner statement; mlpl-mode keywords; `include` in `--babel-session`; REPL line editing, multi-line blocks and `include` at the prompt; aligned matrix printing; `else if` chains | bisecting silent-position errors; duplicated `lib/` in literate docs; `rlwrap` around the REPL; `else { if ... }` nesting | all; demo-coding-agent F7 |
 | tensor-indexing | differentiable `gather(x, idx[, axis])` (rank-1 too), `slice` / `drop`, multi-axis `at(x, i, j)`, `reverse`, `sort` | `reshape(gather_rows(...))` single-index gathers (`u:gather1`), `take(take(`, reshape-gather-flatten sorts, `rotate` + `compress` differences | demo-abstract-algebra 150 / 147, moe-microscope 62, microgpt-mlpl 60 |
-| array-idioms | `sign`, `running_max` / `running_min`, `scan(:u:f, v)`, `partition(mask, v)` | loops for reduce-scan idioms; `(x > 0) - (x < 0)` signs | array-language-comparisons port |
+| array-idioms | `sign`, `running_max` / `running_min`, `scan(:u:f, v)`, `partition(mask, v)`, elementwise `max` / `min`, `reduce_max` / `reduce_min` | loops for reduce-scan idioms; `(x > 0) - (x < 0)` signs; `if a > b { a } else { b }` maxima | array-language-comparisons port; transducers literate doc |
 | param-groups | `param_init({...}, seed, std)` returning a name group `adam` / `grad` / `params` accept | inline 9-name `adam` lists; 18-line param declarations | microgpt-mlpl (f) |
 | lists-and-text | `list_at`, `for s in string_list`, `list_append` / `list_concat`, `codepoints` | `unwrap(list_get(`; `;`-join + `str_split` round trips; ASCII-only assumptions | moe-microscope 187, demo-abstract-algebra 56, demo-coding-agent 37 |
 | cow-values | shared copy-on-write arrays and records | pre-encoding to dodge read copies; trace-instead-of-mutate; quadratic append loops | microgpt-mlpl (e), reasoning-from-scratch (R10), demo-funtional-pipelines |
@@ -115,7 +115,8 @@ repo's ledger):
 - demo-abstract-algebra A2 (deep recursion aborts), A3, A4, C1-C3,
   D1-D3, E1-E4, #24, #25.
 - demo-coding-agent F6 (`include` resolution differs repl vs
-  mlplunit), F7 (`else if` / `match`), F9 (stdin TTY).
+  mlplunit), F7 `match` (its `else if` half is now queued in
+  diagnostics-and-repl), F9 (stdin TTY).
 - demo-linear-algebra B1 (batched matmul, same as R3), B2 (stable
   solve), B3 (ordered SVD).
 - demo-funtional-pipelines: `reduce(:u:step, ...)` over a user
@@ -138,15 +139,23 @@ waits on, so the next person deletes it on schedule.
 
 - Whole-array expressions first; a `while` over indices is the last
   resort and deserves a comment saying why.
-- Masks are arrays: build them with comparisons and use them with
-  `compress(mask, x)` (filter), `mask * x` (select) or
-  `reduce_add(mask)` (count).
+- Masks are arrays: build them with comparisons (and `and` / `or` /
+  `not`) and use them with `compress(mask, x)` (filter), `mask * x`
+  (select) or `reduce_add(mask)` (count). When `x` can hold NaN, filter
+  with `compress` -- `0 * NaN` is NaN, so `reduce_add(mask * x)` is
+  poisoned by one missing value.
 - Outer products come from broadcasting a column against a row
   (`reshape(r, [k, 1]) * reshape(r, [1, k])`) or `table(:u:f, a, b)`;
   see `examples/primes.mlpl` for the classic sieve.
 - Per-element logic is `each(:u:f, v)`, not an index loop.
 - Build strings with `str_join(parts, sep)` (linear time), not
   repeated `str_concat` (quadratic).
+- Streams, early exit, and pipelines reused across sources and sinks
+  are transducer territory: `examples/literate/transducers.org` (tangled
+  to `transducers.mlpl`) has `mapping` / `filtering` / `taking` /
+  `catting` / `comp` / `transduce` to copy. Feed element-at-a-time
+  folds in chunks: `at(v, i)` copies `v` today, so an index loop over
+  one 100k array is quadratic (6.4 s vs 0.28 s chunked; cow-values).
 
 **Functions, values, results.**
 

@@ -38,6 +38,15 @@ demos &mdash; especially the connect-only ones the public browser demo can't run
     convolution, checked against the native <code>conv2d</code> oracle.</p>
   </li>
   <li>
+    <a class="title" href="transducers.html">Transducers: one algorithm, any source, any sink</a>
+    <span class="tag cpu">CPU &middot; runs anywhere</span>
+    <p class="desc">Clojure's transducers built from partial application and records:
+    mapping, filtering, a stateful <code>taking</code> with early exit, flattening, and
+    composition. One pipeline drives a sum, a count, a vector, a string, streaming
+    statistics, and a histogram, over arrays, string lists, and a chunked stream &mdash;
+    then an honest, timed comparison with the whole-array idiom.</p>
+  </li>
+  <li>
     <a class="title" href="cuda-tictactoe.html">Tic-Tac-Toe, end to end, in MLPL</a>
     <span class="tag cuda">CUDA &middot; NVIDIA GPU</span>
     <p class="desc">The whole game in the array language &mdash; winner as a matmul,

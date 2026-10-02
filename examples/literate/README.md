@@ -11,6 +11,13 @@ order, captures its output, and exports a standalone HTML file.
   variable bound in an early block is still in scope later -- the same
   state model as typing successive REPL lines. Prose between the blocks
   narrates each step.
+- `transducers.org` -- Clojure-style transducers built from partial
+  application and records, reused across reducers, sources (arrays,
+  string lists, a chunked stream), and statistics, with a timed
+  comparison against the whole-array idiom. Its blocks tangle to
+  `transducers.mlpl` (`org-babel-tangle`), a standalone program pinned
+  by `mlpl-eval`'s `transducers_literate_tests`; re-tangle after
+  editing a block.
 - `publish.sh` / `publish.el` -- batch publisher. No interactive Emacs.
 - `basics.html` -- generated output (git-ignored; regenerate any time).
 

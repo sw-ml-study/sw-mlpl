@@ -1,6 +1,6 @@
 number = 6
 slug = "transducers-literate"
-status = "pending"
+status = "in-progress"
 description = "New literate document examples/literate/transducers.org (+ its tangled .mlpl,..."
 role = "production"
 context_files = []
