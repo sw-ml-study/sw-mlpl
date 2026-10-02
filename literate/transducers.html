@@ -1,0 +1,1109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2026-10-02 Fri 13:04 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Transducers in MLPL</title>
+<meta name="author" content="MLPL" />
+<meta name="generator" content="Org Mode" />
+<style type="text/css">
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+<style>
+/* Syntax colors for MLPL source blocks in published literate HTML.
+   publish.el exports blocks through htmlize with CSS output
+   (org-html-htmlize-output-type 'css, font prefix "org-"), so each
+   token carries a face class -- the mlpl-mode faces (org-mlpl-*) and
+   the font-lock faces they inherit or use (org-comment, org-string,
+   ...) -- and this sheet colors them. Inlined into every page by
+   publish.el; one source of truth for all the docs. */
+
+pre.src, pre.example {
+  background: #fafafa;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+}
+.org-mlpl-keyword, .org-keyword { color: #d73a49; font-weight: bold; }
+.org-mlpl-context-keyword, .org-type { color: #b31d28; font-weight: bold; }
+.org-mlpl-builtin, .org-builtin { color: #6f42c1; }
+.org-mlpl-number, .org-constant, .org-number { color: #005cc5; }
+.org-mlpl-operator, .org-operator { color: #8a8f98; }
+.org-string, .org-doc { color: #22863a; }
+.org-comment, .org-comment-delimiter { color: #6a737d; font-style: italic; }
+.org-preprocessor { color: #e36209; }
+.org-function-name { color: #e36209; }
+.org-variable-name { color: #b08800; }
+
+@media (prefers-color-scheme: dark) {
+  body { background: #16181c; color: #d8dade; }
+  a { color: #79b8ff; }
+  pre.src, pre.example { background: #1f2227; border-color: #33373e; color: #d8dade; }
+  .org-mlpl-keyword, .org-keyword { color: #f97583; }
+  .org-mlpl-context-keyword, .org-type { color: #fdaeb7; }
+  .org-mlpl-builtin, .org-builtin { color: #b392f0; }
+  .org-mlpl-number, .org-constant, .org-number { color: #79b8ff; }
+  .org-mlpl-operator, .org-operator { color: #7d8590; }
+  .org-string, .org-doc { color: #85e89d; }
+  .org-comment, .org-comment-delimiter { color: #8b949e; }
+  .org-preprocessor, .org-function-name { color: #ffab70; }
+  .org-variable-name { color: #ffdf5d; }
+  table, th, td { border-color: #33373e; }
+}
+</style>
+<script>
+  window.MathJax = {
+    tex: {
+      ams: {
+        multlineWidth: '85%'
+      },
+      tags: 'ams',
+      tagSide: 'right',
+      tagIndent: '.8em'
+    },
+    chtml: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    svg: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    output: {
+      font: 'mathjax-modern',
+      displayOverflow: 'overflow'
+    }
+  };
+</script>
+
+<script
+  id="MathJax-script"
+  async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Transducers in MLPL
+<br />
+<span class="subtitle">one reusable algorithm, any source, any sink &#x2013; built from partial application</span>
+</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org23c98e2">1. The idea in one paragraph</a></li>
+<li><a href="#org9e62617">2. Building blocks</a>
+<ul>
+<li><a href="#orgcd88131">2.1. Functions as values</a></li>
+<li><a href="#orgaecbe11">2.2. A reducing function is a record of three steps</a></li>
+<li><a href="#orga5363cd">2.3. Early termination: <code>reduced</code></a></li>
+<li><a href="#org045185f">2.4. Folding over any source</a></li>
+</ul>
+</li>
+<li><a href="#orgb03391a">3. The transducers</a>
+<ul>
+<li><a href="#org858508f">3.1. <code>mapping</code> and <code>filtering</code></a></li>
+<li><a href="#org695524a">3.2. Composition</a></li>
+<li><a href="#orgbcee58c">3.3. <code>taking</code>: a stateful transducer with early exit</a></li>
+<li><a href="#orga14291d">3.4. <code>catting</code>: one input, many outputs</a></li>
+</ul>
+</li>
+<li><a href="#orgde58f6c">4. Benefit 1: one pipeline, many reducers</a></li>
+<li><a href="#org20dc0cc">5. Benefit 2: one pipeline, many sources</a>
+<ul>
+<li><a href="#org818e1d7">5.1. A chunked stream, in constant memory</a></li>
+</ul>
+</li>
+<li><a href="#org44851ae">6. Benefit 3: clean once, measure many ways</a></li>
+<li><a href="#org014ee26">7. Benefit 4 &#x2013; and the honest limit: the array idiom</a></li>
+<li><a href="#orga142cfd">8. Summary</a></li>
+</ul>
+</div>
+</div>
+<p>
+A <i>transducer</i> is Clojure's name for a transformation of a reduction
+that knows nothing about where its inputs come from or where its result
+goes. "Square the odd numbers" is the same algorithm whether the numbers
+arrive as an array, as lines of a file, or in chunks off a socket, and
+whether the answer is a sum, a count, a vector, or a histogram. A
+transducer captures exactly that algorithm, once, and composes with
+others like ordinary functions.
+</p>
+
+<p>
+This document builds transducers in MLPL from two language features &#x2013;
+records and partial application &#x2013; and then uses them four ways:
+</p>
+
+<ol class="org-ol">
+<li>one pipeline reused with many reducers;</li>
+<li>one pipeline reused over many sources, including a chunked stream;</li>
+<li>a data-cleaning pipeline feeding streaming statistics;</li>
+<li>a side-by-side with MLPL's own whole-array idiom, with timings.</li>
+</ol>
+
+<p>
+Every block is live: the output beneath it is what MLPL printed.
+</p>
+<div id="outline-container-org23c98e2" class="outline-2">
+<h2 id="org23c98e2"><span class="section-number-2">1.</span> The idea in one paragraph</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+A <i>reducing function</i> <code>rf(acc, x)</code> folds one more input <code>x</code> into an
+accumulator <code>acc</code>: addition for a sum, "append" for a list. A transducer
+<code>xf</code> is a function from reducing function to reducing function:
+<code>xf(rf)</code> is a new <code>rf</code> that does some work before (or instead of)
+calling the old one. <i>Mapping</i> <code>f</code> turns <code>rf</code> into "call <code>rf</code> with
+<code>f(x)</code>". <i>Filtering</i> by <code>p</code> turns it into "call <code>rf</code> only when <code>p(x)</code>".
+Because a transducer only ever sees <code>rf</code>, it never builds an
+intermediate collection: <code>map</code> then <code>filter</code> then <code>sum</code> is one pass with
+no temporary arrays, and the same <code>xf</code> drives any <code>rf</code>.
+</p>
+</div>
+</div>
+<div id="outline-container-org9e62617" class="outline-2">
+<h2 id="org9e62617"><span class="section-number-2">2.</span> Building blocks</h2>
+<div class="outline-text-2" id="text-2">
+</div>
+<div id="outline-container-orgcd88131" class="outline-3">
+<h3 id="orgcd88131"><span class="section-number-3">2.1.</span> Functions as values</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+MLPL has no closures, but it has <i>partial application</i>. <code>call(f, a)</code>
+with fewer arguments than <code>f</code> takes returns a <i>partial</i> &#x2013; the function
+plus its bound arguments, as data. Calling the partial later supplies
+the rest:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-mlpl">def u<span class="org-mlpl-operator">:</span>add(acc<span class="org-mlpl-operator">,</span> x) {
+  <span class="org-string">"The sum reducer: fold `x` into `acc` by addition."</span>
+  acc <span class="org-mlpl-operator">+</span> x
+}
+add<span class="org-mlpl-operator">5</span> <span class="org-mlpl-operator">=</span> call(<span class="org-mlpl-operator">:</span>u<span class="org-mlpl-operator">:</span>add<span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">5</span>)
+print(type_of(add<span class="org-mlpl-operator">5</span>))
+call(add<span class="org-mlpl-operator">5,</span> <span class="org-mlpl-number">10</span>)
+</pre>
+</div>
+
+<pre class="example">
+partial
+15
+</pre>
+
+
+<p>
+That is everything a transducer needs: <code>mapping(f, rf, acc, x)</code> written
+as a four-argument function becomes, after <code>call(:u:mapping, f)</code>, a
+transducer waiting for its <code>rf</code>, and after that a reducing function
+waiting for <code>acc</code> and <code>x</code>.
+</p>
+</div>
+</div>
+<div id="outline-container-orgaecbe11" class="outline-3">
+<h3 id="orgaecbe11"><span class="section-number-3">2.2.</span> A reducing function is a record of three steps</h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+Clojure reducing functions have three arities: start, step, and
+completion. The extra two matter for <i>stateful</i> transducers (<code>taking</code>
+below needs a counter, which it keeps inside the accumulator and must
+strip off at the end). In MLPL a reducing function is a record of three
+callables:
+</p>
+
+<ul class="org-ul">
+<li><code>start(init)</code> &#x2013; prepare the initial accumulator,</li>
+<li><code>step(acc, x)</code> &#x2013; fold one input,</li>
+<li><code>done(acc)</code> &#x2013; turn the final accumulator into the result.</li>
+</ul>
+
+<p>
+Most reducers only have a <code>step</code>, so <code>u:reducer</code> fills in identities:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-mlpl">def u<span class="org-mlpl-operator">:</span>id(x) {
+  <span class="org-string">"Identity: returns `x` unchanged (the default start / done step)."</span>
+  x
+}
+def u<span class="org-mlpl-operator">:</span>reducer(step) {
+  <span class="org-string">"A reducing-function record for a two-argument `step`, with no start or done work."</span>
+  {start<span class="org-mlpl-operator">:</span> <span class="org-mlpl-operator">:</span>u<span class="org-mlpl-operator">:</span>id<span class="org-mlpl-operator">,</span> step<span class="org-mlpl-operator">:</span> step<span class="org-mlpl-operator">,</span> done<span class="org-mlpl-operator">:</span> <span class="org-mlpl-operator">:</span>u<span class="org-mlpl-operator">:</span>id}
+}
+sum_rf <span class="org-mlpl-operator">=</span> u<span class="org-mlpl-operator">:</span>reducer(<span class="org-mlpl-operator">:</span>u<span class="org-mlpl-operator">:</span>add)
+call(sum_rf<span class="org-mlpl-operator">.</span>step<span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">3</span><span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">4</span>)
+</pre>
+</div>
+
+<pre class="example">
+7
+</pre>
+</div>
+</div>
+<div id="outline-container-orga5363cd" class="outline-3">
+<h3 id="orga5363cd"><span class="section-number-3">2.3.</span> Early termination: <code>reduced</code></h3>
+<div class="outline-text-3" id="text-2-3">
+<p>
+A reducer can say "I have my answer, stop feeding me" by wrapping its
+accumulator in a marker record. The driving loop checks for it after
+every step. (Clojure calls this <code>reduced</code>.)
+</p>
+
+<div class="org-src-container">
+<pre class="src src-mlpl">def u<span class="org-mlpl-operator">:</span>reduced(acc) {
+  <span class="org-string">"Mark `acc` as final: the fold stops after the step that returned this."</span>
+  {reduced<span class="org-mlpl-operator">:</span> <span class="org-mlpl-number">1</span><span class="org-mlpl-operator">,</span> value<span class="org-mlpl-operator">:</span> acc}
+}
+def u<span class="org-mlpl-operator">:</span>is_reduced(a) {
+  <span class="org-string">"1 when `a` is a `reduced` marker, else 0."</span>
+  if str_eq(type_of(a)<span class="org-mlpl-operator">,</span> <span class="org-string">"record"</span>) {
+    has_field(a<span class="org-mlpl-operator">,</span> <span class="org-string">"reduced"</span>)
+  } else {
+    <span class="org-mlpl-number">0</span>
+  }
+}
+def u<span class="org-mlpl-operator">:</span>unreduced(a) {
+  <span class="org-string">"The accumulator inside a `reduced` marker, or `a` itself."</span>
+  if u<span class="org-mlpl-operator">:</span>is_reduced(a) {
+    a<span class="org-mlpl-operator">.</span>value
+  } else {
+    a
+  }
+}
+u<span class="org-mlpl-operator">:</span>unreduced(u<span class="org-mlpl-operator">:</span>reduced(<span class="org-mlpl-number">42</span>))
+</pre>
+</div>
+
+<pre class="example">
+42
+</pre>
+</div>
+</div>
+<div id="outline-container-org045185f" class="outline-3">
+<h3 id="org045185f"><span class="section-number-3">2.4.</span> Folding over any source</h3>
+<div class="outline-text-3" id="text-2-4">
+<p>
+A <i>source</i> only has to answer two questions: how many items, and what is
+item <code>i</code>. Arrays answer with their leading axis (so a matrix yields its
+rows), string lists with <code>list_len</code> / <code>list_get</code>. <code>u:fold</code> is the only
+loop in this document; note that <code>and</code> / <code>not</code> short-circuit, so
+<code>u:is_reduced</code> is checked only while items remain.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-mlpl">def u<span class="org-mlpl-operator">:</span>size(coll) {
+  <span class="org-string">"Item count: list length for a string list, leading-axis length for an array."</span>
+  if str_eq(type_of(coll)<span class="org-mlpl-operator">,</span> <span class="org-string">"string-list"</span>) {
+    list_len(coll)
+  } else {
+    at(<span class="org-mlpl-builtin">shape</span>(coll)<span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">0</span>)
+  }
+}
+def u<span class="org-mlpl-operator">:</span>item(coll<span class="org-mlpl-operator">,</span> i) {
+  <span class="org-string">"Item `i`: a string, a vector element, or (rank &gt;= 2) a row."</span>
+  if str_eq(type_of(coll)<span class="org-mlpl-operator">,</span> <span class="org-string">"string-list"</span>) {
+    unwrap(list_get(coll<span class="org-mlpl-operator">,</span> i))
+  } else {
+    if <span class="org-mlpl-builtin">rank</span>(coll) <span class="org-mlpl-operator">==</span> <span class="org-mlpl-number">1</span> {
+      at(coll<span class="org-mlpl-operator">,</span> i)
+    } else {
+      take(coll<span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">0</span><span class="org-mlpl-operator">,</span> i)
+    }
+  }
+}
+def u<span class="org-mlpl-operator">:</span>fold(step<span class="org-mlpl-operator">,</span> acc<span class="org-mlpl-operator">,</span> coll) {
+  <span class="org-string">"Fold `step` over `coll` from `acc`, stopping early at a `reduced` marker."</span>
+  i <span class="org-mlpl-operator">=</span> <span class="org-mlpl-number">0</span>
+  n <span class="org-mlpl-operator">=</span> u<span class="org-mlpl-operator">:</span>size(coll)
+  while i <span class="org-mlpl-operator">&lt;</span> n and not u<span class="org-mlpl-operator">:</span>is_reduced(acc) {
+    acc <span class="org-mlpl-operator">=</span> call(step<span class="org-mlpl-operator">,</span> acc<span class="org-mlpl-operator">,</span> u<span class="org-mlpl-operator">:</span>item(coll<span class="org-mlpl-operator">,</span> i))
+    i <span class="org-mlpl-operator">=</span> i <span class="org-mlpl-operator">+</span> <span class="org-mlpl-number">1</span>
+  }
+  acc
+}
+def u<span class="org-mlpl-operator">:</span>transduce(xf<span class="org-mlpl-operator">,</span> rf<span class="org-mlpl-operator">,</span> init<span class="org-mlpl-operator">,</span> coll) {
+  <span class="org-string">"Run transducer `xf` over `coll` into reducer `rf`, starting from `init`."</span>
+  r <span class="org-mlpl-operator">=</span> call(xf<span class="org-mlpl-operator">,</span> rf)
+  acc <span class="org-mlpl-operator">=</span> u<span class="org-mlpl-operator">:</span>fold(r<span class="org-mlpl-operator">.</span>step<span class="org-mlpl-operator">,</span> call(r<span class="org-mlpl-operator">.</span>start<span class="org-mlpl-operator">,</span> init)<span class="org-mlpl-operator">,</span> coll)
+  call(r<span class="org-mlpl-operator">.</span>done<span class="org-mlpl-operator">,</span> u<span class="org-mlpl-operator">:</span>unreduced(acc))
+}
+u<span class="org-mlpl-operator">:</span>transduce(<span class="org-mlpl-operator">:</span>u<span class="org-mlpl-operator">:</span>id<span class="org-mlpl-operator">,</span> sum_rf<span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">0</span><span class="org-mlpl-operator">,</span> [<span class="org-mlpl-number">1</span><span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">2</span><span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">3</span><span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">4</span>])
+</pre>
+</div>
+
+<pre class="example">
+10
+</pre>
+
+
+<p>
+The identity transducer <code>:u:id</code> leaves <code>rf</code> alone, so that is a plain
+sum.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-orgb03391a" class="outline-2">
+<h2 id="orgb03391a"><span class="section-number-2">3.</span> The transducers</h2>
+<div class="outline-text-2" id="text-3">
+</div>
+<div id="outline-container-org858508f" class="outline-3">
+<h3 id="org858508f"><span class="section-number-3">3.1.</span> <code>mapping</code> and <code>filtering</code></h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+Each transducer is a <i>step wrapper</i> plus a constructor that rebuilds the
+reducer record around it. The step wrappers take their configuration
+first (<code>f</code>, <code>p</code>) and the wrapped <code>step</code> second, so a partial over the
+first one or two arguments is exactly the shape needed.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-mlpl">def u<span class="org-mlpl-operator">:</span>map_step(f<span class="org-mlpl-operator">,</span> step<span class="org-mlpl-operator">,</span> acc<span class="org-mlpl-operator">,</span> x) {
+  <span class="org-string">"Mapping's step: pass `f(x)` on to the wrapped `step`."</span>
+  call(step<span class="org-mlpl-operator">,</span> acc<span class="org-mlpl-operator">,</span> call(f<span class="org-mlpl-operator">,</span> x))
+}
+def u<span class="org-mlpl-operator">:</span>mapping(f<span class="org-mlpl-operator">,</span> rf) {
+  <span class="org-string">"Transducer: apply `f` to every input before `rf` sees it."</span>
+  {start<span class="org-mlpl-operator">:</span> rf<span class="org-mlpl-operator">.</span>start<span class="org-mlpl-operator">,</span> step<span class="org-mlpl-operator">:</span> call(<span class="org-mlpl-operator">:</span>u<span class="org-mlpl-operator">:</span>map_step<span class="org-mlpl-operator">,</span> f<span class="org-mlpl-operator">,</span> rf<span class="org-mlpl-operator">.</span>step)<span class="org-mlpl-operator">,</span> done<span class="org-mlpl-operator">:</span> rf<span class="org-mlpl-operator">.</span>done}
+}
+def u<span class="org-mlpl-operator">:</span>filter_step(p<span class="org-mlpl-operator">,</span> step<span class="org-mlpl-operator">,</span> acc<span class="org-mlpl-operator">,</span> x) {
+  <span class="org-string">"Filtering's step: pass `x` on only when `p(x)` is nonzero."</span>
+  if call(p<span class="org-mlpl-operator">,</span> x) {
+    call(step<span class="org-mlpl-operator">,</span> acc<span class="org-mlpl-operator">,</span> x)
+  } else {
+    acc
+  }
+}
+def u<span class="org-mlpl-operator">:</span>filtering(p<span class="org-mlpl-operator">,</span> rf) {
+  <span class="org-string">"Transducer: keep only the inputs where `p` is nonzero."</span>
+  {start<span class="org-mlpl-operator">:</span> rf<span class="org-mlpl-operator">.</span>start<span class="org-mlpl-operator">,</span> step<span class="org-mlpl-operator">:</span> call(<span class="org-mlpl-operator">:</span>u<span class="org-mlpl-operator">:</span>filter_step<span class="org-mlpl-operator">,</span> p<span class="org-mlpl-operator">,</span> rf<span class="org-mlpl-operator">.</span>step)<span class="org-mlpl-operator">,</span> done<span class="org-mlpl-operator">:</span> rf<span class="org-mlpl-operator">.</span>done}
+}
+def u<span class="org-mlpl-operator">:</span>sq(x) {
+  <span class="org-string">"`x` squared."</span>
+  x * x
+}
+def u<span class="org-mlpl-operator">:</span>is_odd(x) {
+  <span class="org-string">"1 when `x` is an odd integer."</span>
+  x <span class="org-mlpl-operator">-</span> <span class="org-mlpl-number">2</span> * floor(x <span class="org-mlpl-operator">/</span> <span class="org-mlpl-number">2</span>) <span class="org-mlpl-operator">==</span> <span class="org-mlpl-number">1</span>
+}
+u<span class="org-mlpl-operator">:</span>transduce(call(<span class="org-mlpl-operator">:</span>u<span class="org-mlpl-operator">:</span>mapping<span class="org-mlpl-operator">,</span> <span class="org-mlpl-operator">:</span>u<span class="org-mlpl-operator">:</span>sq)<span class="org-mlpl-operator">,</span> sum_rf<span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">0</span><span class="org-mlpl-operator">,</span> [<span class="org-mlpl-number">1</span><span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">2</span><span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">3</span>])
+</pre>
+</div>
+
+<pre class="example">
+14
+</pre>
+</div>
+</div>
+<div id="outline-container-org695524a" class="outline-3">
+<h3 id="org695524a"><span class="section-number-3">3.2.</span> Composition</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+Composing transducers is composing functions: <code>comp(a, b)</code> applied to
+<code>rf</code> is <code>a(b(rf))</code>. Inputs flow through <code>a</code> first, then <code>b</code> &#x2013; the
+left-to-right order you read the pipeline in.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-mlpl">def u<span class="org-mlpl-operator">:</span>comp_xf(outer<span class="org-mlpl-operator">,</span> inner<span class="org-mlpl-operator">,</span> rf) {
+  <span class="org-string">"Apply `inner` to `rf`, then `outer` to the result."</span>
+  call(outer<span class="org-mlpl-operator">,</span> call(inner<span class="org-mlpl-operator">,</span> rf))
+}
+def u<span class="org-mlpl-operator">:</span>comp(outer<span class="org-mlpl-operator">,</span> inner) {
+  <span class="org-string">"Transducer: `outer`, then `inner` (inputs flow through `outer` first)."</span>
+  call(<span class="org-mlpl-operator">:</span>u<span class="org-mlpl-operator">:</span>comp_xf<span class="org-mlpl-operator">,</span> outer<span class="org-mlpl-operator">,</span> inner)
+}
+odd_squares <span class="org-mlpl-operator">=</span> u<span class="org-mlpl-operator">:</span>comp(call(<span class="org-mlpl-operator">:</span>u<span class="org-mlpl-operator">:</span>filtering<span class="org-mlpl-operator">,</span> <span class="org-mlpl-operator">:</span>u<span class="org-mlpl-operator">:</span>is_odd)<span class="org-mlpl-operator">,</span> call(<span class="org-mlpl-operator">:</span>u<span class="org-mlpl-operator">:</span>mapping<span class="org-mlpl-operator">,</span> <span class="org-mlpl-operator">:</span>u<span class="org-mlpl-operator">:</span>sq))
+u<span class="org-mlpl-operator">:</span>transduce(odd_squares<span class="org-mlpl-operator">,</span> sum_rf<span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">0</span><span class="org-mlpl-operator">,</span> <span class="org-mlpl-builtin">iota</span>(<span class="org-mlpl-number">10</span>))
+</pre>
+</div>
+
+<pre class="example">
+165
+</pre>
+
+
+<p>
+\(1 + 9 + 25 + 49 + 81 = 165\), in one pass, with no array of odd numbers
+and no array of squares ever built.
+</p>
+</div>
+</div>
+<div id="outline-container-orgbcee58c" class="outline-3">
+<h3 id="orgbcee58c"><span class="section-number-3">3.3.</span> <code>taking</code>: a stateful transducer with early exit</h3>
+<div class="outline-text-3" id="text-3-3">
+<p>
+<code>taking(n)</code> passes the first <code>n</code> inputs and then stops the whole fold.
+It needs a counter, and MLPL partials are immutable data, so the counter
+lives <i>in the accumulator</i>: <code>start</code> wraps the downstream accumulator as
+<code>{inner, left}</code>, <code>step</code> counts down and returns <code>reduced</code> when it hits
+zero, and <code>done</code> unwraps. This is what the three-step reducer record is
+for.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-mlpl">def u<span class="org-mlpl-operator">:</span>take_start(n<span class="org-mlpl-operator">,</span> start<span class="org-mlpl-operator">,</span> init) {
+  <span class="org-string">"Taking's start: wrap the downstream accumulator with the count left."</span>
+  {inner<span class="org-mlpl-operator">:</span> call(start<span class="org-mlpl-operator">,</span> init)<span class="org-mlpl-operator">,</span> left<span class="org-mlpl-operator">:</span> n}
+}
+def u<span class="org-mlpl-operator">:</span>take_step(step<span class="org-mlpl-operator">,</span> st<span class="org-mlpl-operator">,</span> x) {
+  <span class="org-string">"Taking's step: fold `x`, count down, and stop at zero (or when downstream stops)."</span>
+  inner <span class="org-mlpl-operator">=</span> call(step<span class="org-mlpl-operator">,</span> st<span class="org-mlpl-operator">.</span>inner<span class="org-mlpl-operator">,</span> x)
+  next <span class="org-mlpl-operator">=</span> {inner<span class="org-mlpl-operator">:</span> u<span class="org-mlpl-operator">:</span>unreduced(inner)<span class="org-mlpl-operator">,</span> left<span class="org-mlpl-operator">:</span> st<span class="org-mlpl-operator">.</span>left <span class="org-mlpl-operator">-</span> <span class="org-mlpl-number">1</span>}
+  if next<span class="org-mlpl-operator">.</span>left <span class="org-mlpl-operator">&lt;=</span> <span class="org-mlpl-number">0</span> or u<span class="org-mlpl-operator">:</span>is_reduced(inner) {
+    u<span class="org-mlpl-operator">:</span>reduced(next)
+  } else {
+    next
+  }
+}
+def u<span class="org-mlpl-operator">:</span>take_done(done<span class="org-mlpl-operator">,</span> st) {
+  <span class="org-string">"Taking's done: unwrap and finish downstream."</span>
+  call(done<span class="org-mlpl-operator">,</span> st<span class="org-mlpl-operator">.</span>inner)
+}
+def u<span class="org-mlpl-operator">:</span>taking(n<span class="org-mlpl-operator">,</span> rf) {
+  <span class="org-string">"Transducer: pass the first `n` inputs (n &gt;= 1), then stop the fold."</span>
+  {start<span class="org-mlpl-operator">:</span> call(<span class="org-mlpl-operator">:</span>u<span class="org-mlpl-operator">:</span>take_start<span class="org-mlpl-operator">,</span> n<span class="org-mlpl-operator">,</span> rf<span class="org-mlpl-operator">.</span>start)<span class="org-mlpl-operator">,</span> step<span class="org-mlpl-operator">:</span> call(<span class="org-mlpl-operator">:</span>u<span class="org-mlpl-operator">:</span>take_step<span class="org-mlpl-operator">,</span> rf<span class="org-mlpl-operator">.</span>step)<span class="org-mlpl-operator">,</span> done<span class="org-mlpl-operator">:</span> call(<span class="org-mlpl-operator">:</span>u<span class="org-mlpl-operator">:</span>take_done<span class="org-mlpl-operator">,</span> rf<span class="org-mlpl-operator">.</span>done)}
+}
+first<span class="org-mlpl-operator">3</span> <span class="org-mlpl-operator">=</span> u<span class="org-mlpl-operator">:</span>comp(odd_squares<span class="org-mlpl-operator">,</span> call(<span class="org-mlpl-operator">:</span>u<span class="org-mlpl-operator">:</span>taking<span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">3</span>))
+u<span class="org-mlpl-operator">:</span>transduce(first<span class="org-mlpl-operator">3,</span> sum_rf<span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">0</span><span class="org-mlpl-operator">,</span> <span class="org-mlpl-builtin">iota</span>(<span class="org-mlpl-number">1000000</span>))
+</pre>
+</div>
+
+<pre class="example">
+35
+</pre>
+
+
+<p>
+\(1 + 9 + 25 = 35\). The source has a million items, but the fold stopped
+after the sixth (the third odd one): <code>reduced</code> propagates out through
+<code>mapping</code> and <code>filtering</code> untouched, because they just return whatever
+the inner step returned.
+</p>
+</div>
+</div>
+<div id="outline-container-orga14291d" class="outline-3">
+<h3 id="orga14291d"><span class="section-number-3">3.4.</span> <code>catting</code>: one input, many outputs</h3>
+<div class="outline-text-3" id="text-3-4">
+<p>
+<code>catting</code> treats each input as a collection and feeds its items through
+one at a time &#x2013; flatten, as a transducer. It reuses <code>u:fold</code>, so a
+<code>reduced</code> from downstream stops the inner loop and is returned as-is,
+which then stops the outer one.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-mlpl">def u<span class="org-mlpl-operator">:</span>cat_step(step<span class="org-mlpl-operator">,</span> acc<span class="org-mlpl-operator">,</span> xs) {
+  <span class="org-string">"Catting's step: fold every item of the input `xs` into `acc`."</span>
+  u<span class="org-mlpl-operator">:</span>fold(step<span class="org-mlpl-operator">,</span> acc<span class="org-mlpl-operator">,</span> xs)
+}
+def u<span class="org-mlpl-operator">:</span>catting(rf) {
+  <span class="org-string">"Transducer: each input is a collection; pass its items on one by one."</span>
+  {start<span class="org-mlpl-operator">:</span> rf<span class="org-mlpl-operator">.</span>start<span class="org-mlpl-operator">,</span> step<span class="org-mlpl-operator">:</span> call(<span class="org-mlpl-operator">:</span>u<span class="org-mlpl-operator">:</span>cat_step<span class="org-mlpl-operator">,</span> rf<span class="org-mlpl-operator">.</span>step)<span class="org-mlpl-operator">,</span> done<span class="org-mlpl-operator">:</span> rf<span class="org-mlpl-operator">.</span>done}
+}
+<span class="org-mlpl-builtin">grid</span> <span class="org-mlpl-operator">=</span> <span class="org-mlpl-builtin">reshape</span>(<span class="org-mlpl-builtin">iota</span>(<span class="org-mlpl-number">6</span>)<span class="org-mlpl-operator">,</span> [<span class="org-mlpl-number">3</span><span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">2</span>])
+u<span class="org-mlpl-operator">:</span>transduce(<span class="org-mlpl-operator">:</span>u<span class="org-mlpl-operator">:</span>catting<span class="org-mlpl-operator">,</span> sum_rf<span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">0</span><span class="org-mlpl-operator">,</span> <span class="org-mlpl-builtin">grid</span>)
+</pre>
+</div>
+
+<pre class="example">
+15
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgde58f6c" class="outline-2">
+<h2 id="orgde58f6c"><span class="section-number-2">4.</span> Benefit 1: one pipeline, many reducers</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+The pipeline <code>odd_squares</code> was written once. Here it feeds five
+different reducers &#x2013; a sum, a count, a maximum, a collected vector,
+and a string &#x2013; with no change to the pipeline itself:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-mlpl">def u<span class="org-mlpl-operator">:</span>count_step(acc<span class="org-mlpl-operator">,</span> x) {
+  <span class="org-string">"The count reducer: one more input seen."</span>
+  acc <span class="org-mlpl-operator">+</span> <span class="org-mlpl-number">1</span>
+}
+def u<span class="org-mlpl-operator">:</span>max_step(acc<span class="org-mlpl-operator">,</span> x) {
+  <span class="org-string">"The maximum reducer."</span>
+  if x &gt; acc {
+    x
+  } else {
+    acc
+  }
+}
+def u<span class="org-mlpl-operator">:</span>conj(acc<span class="org-mlpl-operator">,</span> x) {
+  <span class="org-string">"The collect reducer: append `x` to the vector `acc`."</span>
+  concat(acc<span class="org-mlpl-operator">,</span> [x]<span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">0</span>)
+}
+def u<span class="org-mlpl-operator">:</span>join_step(acc<span class="org-mlpl-operator">,</span> x) {
+  <span class="org-string">"The join reducer: append `x` to the string `acc`, comma-separated."</span>
+  if str_len(acc) <span class="org-mlpl-operator">==</span> <span class="org-mlpl-number">0</span> {
+    format(<span class="org-string">"{}"</span><span class="org-mlpl-operator">,</span> x)
+  } else {
+    format(<span class="org-string">"{}, {}"</span><span class="org-mlpl-operator">,</span> acc<span class="org-mlpl-operator">,</span> x)
+  }
+}
+xs <span class="org-mlpl-operator">=</span> <span class="org-mlpl-builtin">iota</span>(<span class="org-mlpl-number">10</span>)
+print(u<span class="org-mlpl-operator">:</span>transduce(odd_squares<span class="org-mlpl-operator">,</span> sum_rf<span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">0</span><span class="org-mlpl-operator">,</span> xs))
+print(u<span class="org-mlpl-operator">:</span>transduce(odd_squares<span class="org-mlpl-operator">,</span> u<span class="org-mlpl-operator">:</span>reducer(<span class="org-mlpl-operator">:</span>u<span class="org-mlpl-operator">:</span>count_step)<span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">0</span><span class="org-mlpl-operator">,</span> xs))
+print(u<span class="org-mlpl-operator">:</span>transduce(odd_squares<span class="org-mlpl-operator">,</span> u<span class="org-mlpl-operator">:</span>reducer(<span class="org-mlpl-operator">:</span>u<span class="org-mlpl-operator">:</span>max_step)<span class="org-mlpl-operator">,</span> <span class="org-mlpl-operator">-</span><span class="org-mlpl-number">1</span><span class="org-mlpl-operator">,</span> xs))
+print(u<span class="org-mlpl-operator">:</span>transduce(odd_squares<span class="org-mlpl-operator">,</span> u<span class="org-mlpl-operator">:</span>reducer(<span class="org-mlpl-operator">:</span>u<span class="org-mlpl-operator">:</span>conj)<span class="org-mlpl-operator">,</span> []<span class="org-mlpl-operator">,</span> xs))
+joined <span class="org-mlpl-operator">=</span> u<span class="org-mlpl-operator">:</span>transduce(odd_squares<span class="org-mlpl-operator">,</span> u<span class="org-mlpl-operator">:</span>reducer(<span class="org-mlpl-operator">:</span>u<span class="org-mlpl-operator">:</span>join_step)<span class="org-mlpl-operator">,</span> <span class="org-string">""</span><span class="org-mlpl-operator">,</span> xs)
+joined
+</pre>
+</div>
+
+<pre class="example">
+165
+5
+81
+1 9 25 49 81
+1, 9, 25, 49, 81
+</pre>
+
+
+<p>
+The algorithm (keep the odd ones, square them) and the destination (sum,
+count, max, vector, text) are independent pieces. With ordinary
+whole-collection functions each destination would need the pipeline
+rewritten around it, or an intermediate vector built first.
+</p>
+</div>
+</div>
+<div id="outline-container-org20dc0cc" class="outline-2">
+<h2 id="org20dc0cc"><span class="section-number-2">5.</span> Benefit 2: one pipeline, many sources</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+The source is just as independent. The same <code>u:transduce</code> runs over a
+string list &#x2013; here, the total length of the words longer than four
+letters:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-mlpl">def u<span class="org-mlpl-operator">:</span>longer_than_<span class="org-mlpl-operator">4</span>(w) {
+  <span class="org-string">"1 when the string `w` has more than four characters."</span>
+  str_len(w) &gt; <span class="org-mlpl-number">4</span>
+}
+words <span class="org-mlpl-operator">=</span> [<span class="org-string">"map"</span><span class="org-mlpl-operator">,</span> <span class="org-string">"filter"</span><span class="org-mlpl-operator">,</span> <span class="org-string">"reduce"</span><span class="org-mlpl-operator">,</span> <span class="org-string">"fold"</span><span class="org-mlpl-operator">,</span> <span class="org-string">"transduce"</span><span class="org-mlpl-operator">,</span> <span class="org-string">"comp"</span>]
+long_chars <span class="org-mlpl-operator">=</span> u<span class="org-mlpl-operator">:</span>comp(call(<span class="org-mlpl-operator">:</span>u<span class="org-mlpl-operator">:</span>filtering<span class="org-mlpl-operator">,</span> <span class="org-mlpl-operator">:</span>u<span class="org-mlpl-operator">:</span>longer_than_<span class="org-mlpl-operator">4</span>)<span class="org-mlpl-operator">,</span> call(<span class="org-mlpl-operator">:</span>u<span class="org-mlpl-operator">:</span>mapping<span class="org-mlpl-operator">,</span> <span class="org-mlpl-operator">:</span>str_len))
+print(u<span class="org-mlpl-operator">:</span>transduce(long_chars<span class="org-mlpl-operator">,</span> sum_rf<span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">0</span><span class="org-mlpl-operator">,</span> words))
+u<span class="org-mlpl-operator">:</span>transduce(long_chars<span class="org-mlpl-operator">,</span> u<span class="org-mlpl-operator">:</span>reducer(<span class="org-mlpl-operator">:</span>u<span class="org-mlpl-operator">:</span>conj)<span class="org-mlpl-operator">,</span> []<span class="org-mlpl-operator">,</span> words)
+</pre>
+</div>
+
+<pre class="example">
+21
+6 6 9
+</pre>
+
+
+<p>
+(<code>:str_len</code> is a builtin reference &#x2013; builtins are callables too.)
+</p>
+</div>
+<div id="outline-container-org818e1d7" class="outline-3">
+<h3 id="org818e1d7"><span class="section-number-3">5.1.</span> A chunked stream, in constant memory</h3>
+<div class="outline-text-3" id="text-5-1">
+<p>
+Real streams arrive in pieces: <code>read_stdin_chunk(n)</code> returns
+<code>ok({bytes, eof})</code> one buffer at a time, and a socket or a file read
+with an offset behaves the same way. A transducer does not care: fold
+each chunk into the same accumulator, and only one chunk is ever in
+memory. Below, <code>u:chunk(i)</code> stands in for the stream &#x2013; chunk <code>i</code> is the
+next thousand integers &#x2013; so the example runs anywhere:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-mlpl">def u<span class="org-mlpl-operator">:</span>chunk(i) {
+  <span class="org-string">"Stand-in stream: chunk `i` is the integers 1000 * i .. 1000 * i + 999."</span>
+  <span class="org-mlpl-builtin">iota</span>(<span class="org-mlpl-number">1000</span>) <span class="org-mlpl-operator">+</span> <span class="org-mlpl-number">1000</span> * i
+}
+def u<span class="org-mlpl-operator">:</span>transduce_chunks(xf<span class="org-mlpl-operator">,</span> rf<span class="org-mlpl-operator">,</span> init<span class="org-mlpl-operator">,</span> nchunks) {
+  <span class="org-string">"Run `xf` into `rf` over `nchunks` chunks of the stream, one chunk in memory at a time."</span>
+  r <span class="org-mlpl-operator">=</span> call(xf<span class="org-mlpl-operator">,</span> rf)
+  acc <span class="org-mlpl-operator">=</span> call(r<span class="org-mlpl-operator">.</span>start<span class="org-mlpl-operator">,</span> init)
+  c <span class="org-mlpl-operator">=</span> <span class="org-mlpl-number">0</span>
+  while c <span class="org-mlpl-operator">&lt;</span> nchunks and not u<span class="org-mlpl-operator">:</span>is_reduced(acc) {
+    acc <span class="org-mlpl-operator">=</span> u<span class="org-mlpl-operator">:</span>fold(r<span class="org-mlpl-operator">.</span>step<span class="org-mlpl-operator">,</span> acc<span class="org-mlpl-operator">,</span> u<span class="org-mlpl-operator">:</span>chunk(c))
+    c <span class="org-mlpl-operator">=</span> c <span class="org-mlpl-operator">+</span> <span class="org-mlpl-number">1</span>
+  }
+  call(r<span class="org-mlpl-operator">.</span>done<span class="org-mlpl-operator">,</span> u<span class="org-mlpl-operator">:</span>unreduced(acc))
+}
+streamed <span class="org-mlpl-operator">=</span> u<span class="org-mlpl-operator">:</span>transduce_chunks(odd_squares<span class="org-mlpl-operator">,</span> sum_rf<span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">0</span><span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">20</span>)
+streamed
+</pre>
+</div>
+
+<pre class="example">
+1333333330000
+</pre>
+
+
+<p>
+That is the sum of the odd squares below 20,000, computed without ever
+holding the 20,000 numbers &#x2013; and with <code>taking</code> in the pipeline, the
+loop would stop reading chunks as soon as it had enough. Swapping
+<code>u:chunk(c)</code> for <code>(read_stdin_chunk(4096)?).bytes</code> (and testing <code>eof</code>)
+turns this into a constant-memory filter over piped input.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org44851ae" class="outline-2">
+<h2 id="org44851ae"><span class="section-number-2">6.</span> Benefit 3: clean once, measure many ways</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+Data cleaning is a pipeline; statistics are reducers. Keep them apart
+and both are reusable. The cleaning transducer drops missing values
+(<code>NaN</code> is never equal to itself) and out-of-range readings, then
+rescales to \([0, 1]\):
+</p>
+
+<div class="org-src-container">
+<pre class="src src-mlpl">def u<span class="org-mlpl-operator">:</span>is_valid(x) {
+  <span class="org-string">"1 when `x` is a number (not NaN) within the sensor range [0, 50]."</span>
+  x <span class="org-mlpl-operator">==</span> x and x &gt;<span class="org-mlpl-operator">=</span> <span class="org-mlpl-number">0</span> and x <span class="org-mlpl-operator">&lt;=</span> <span class="org-mlpl-number">50</span>
+}
+def u<span class="org-mlpl-operator">:</span>to_unit(x) {
+  <span class="org-string">"Rescale a reading from [0, 50] to [0, 1]."</span>
+  x <span class="org-mlpl-operator">/</span> <span class="org-mlpl-number">50</span>
+}
+clean <span class="org-mlpl-operator">=</span> u<span class="org-mlpl-operator">:</span>comp(call(<span class="org-mlpl-operator">:</span>u<span class="org-mlpl-operator">:</span>filtering<span class="org-mlpl-operator">,</span> <span class="org-mlpl-operator">:</span>u<span class="org-mlpl-operator">:</span>is_valid)<span class="org-mlpl-operator">,</span> call(<span class="org-mlpl-operator">:</span>u<span class="org-mlpl-operator">:</span>mapping<span class="org-mlpl-operator">,</span> <span class="org-mlpl-operator">:</span>u<span class="org-mlpl-operator">:</span>to_unit))
+readings <span class="org-mlpl-operator">=</span> [<span class="org-mlpl-number">12</span><span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">0</span> <span class="org-mlpl-operator">/</span> <span class="org-mlpl-number">0</span><span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">31</span><span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">47</span><span class="org-mlpl-operator">,</span> <span class="org-mlpl-operator">-</span><span class="org-mlpl-number">3</span><span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">25</span><span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">999</span><span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">40</span><span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">0</span> <span class="org-mlpl-operator">/</span> <span class="org-mlpl-number">0</span><span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">5</span>]
+u<span class="org-mlpl-operator">:</span>transduce(clean<span class="org-mlpl-operator">,</span> u<span class="org-mlpl-operator">:</span>reducer(<span class="org-mlpl-operator">:</span>u<span class="org-mlpl-operator">:</span>conj)<span class="org-mlpl-operator">,</span> []<span class="org-mlpl-operator">,</span> readings)
+</pre>
+</div>
+
+<pre class="example">
+0.24 0.62 0.94 0.5 0.8 0.1
+</pre>
+
+
+<p>
+The first reducer is Welford's streaming mean and variance: one pass,
+numerically stable, constant memory &#x2013; a record accumulator, with a
+<code>done</code> step that turns the running sums into the answer. (Record
+destructuring keeps the update readable.)
+</p>
+
+<div class="org-src-container">
+<pre class="src src-mlpl">def u<span class="org-mlpl-operator">:</span>welford_step(s<span class="org-mlpl-operator">,</span> x) {
+  <span class="org-string">"Welford's update: fold `x` into the running count, mean, and sum of squared deviations."</span>
+  {n<span class="org-mlpl-operator">,</span> <span class="org-mlpl-builtin">mean</span><span class="org-mlpl-operator">,</span> m<span class="org-mlpl-operator">2</span>} <span class="org-mlpl-operator">=</span> s
+  n<span class="org-mlpl-operator">1</span> <span class="org-mlpl-operator">=</span> n <span class="org-mlpl-operator">+</span> <span class="org-mlpl-number">1</span>
+  d <span class="org-mlpl-operator">=</span> x <span class="org-mlpl-operator">-</span> <span class="org-mlpl-builtin">mean</span>
+  mean<span class="org-mlpl-operator">1</span> <span class="org-mlpl-operator">=</span> <span class="org-mlpl-builtin">mean</span> <span class="org-mlpl-operator">+</span> d <span class="org-mlpl-operator">/</span> n<span class="org-mlpl-operator">1</span>
+  {n<span class="org-mlpl-operator">:</span> n<span class="org-mlpl-operator">1,</span> <span class="org-mlpl-builtin">mean</span><span class="org-mlpl-operator">:</span> mean<span class="org-mlpl-operator">1,</span> m<span class="org-mlpl-operator">2:</span> m<span class="org-mlpl-operator">2</span> <span class="org-mlpl-operator">+</span> d * (x <span class="org-mlpl-operator">-</span> mean<span class="org-mlpl-operator">1</span>)}
+}
+def u<span class="org-mlpl-operator">:</span>welford_done(s) {
+  <span class="org-string">"Finish Welford: the count, the mean, and the population variance."</span>
+  {n<span class="org-mlpl-operator">,</span> <span class="org-mlpl-builtin">mean</span><span class="org-mlpl-operator">,</span> m<span class="org-mlpl-operator">2</span>} <span class="org-mlpl-operator">=</span> s
+  {n<span class="org-mlpl-operator">:</span> n<span class="org-mlpl-operator">,</span> <span class="org-mlpl-builtin">mean</span><span class="org-mlpl-operator">:</span> <span class="org-mlpl-builtin">mean</span><span class="org-mlpl-operator">,</span> var<span class="org-mlpl-operator">:</span> m<span class="org-mlpl-operator">2</span> <span class="org-mlpl-operator">/</span> n}
+}
+stats_rf <span class="org-mlpl-operator">=</span> {start<span class="org-mlpl-operator">:</span> <span class="org-mlpl-operator">:</span>u<span class="org-mlpl-operator">:</span>id<span class="org-mlpl-operator">,</span> step<span class="org-mlpl-operator">:</span> <span class="org-mlpl-operator">:</span>u<span class="org-mlpl-operator">:</span>welford_step<span class="org-mlpl-operator">,</span> done<span class="org-mlpl-operator">:</span> <span class="org-mlpl-operator">:</span>u<span class="org-mlpl-operator">:</span>welford_done}
+stats <span class="org-mlpl-operator">=</span> u<span class="org-mlpl-operator">:</span>transduce(clean<span class="org-mlpl-operator">,</span> stats_rf<span class="org-mlpl-operator">,</span> {n<span class="org-mlpl-operator">:</span> <span class="org-mlpl-number">0</span><span class="org-mlpl-operator">,</span> <span class="org-mlpl-builtin">mean</span><span class="org-mlpl-operator">:</span> <span class="org-mlpl-number">0</span><span class="org-mlpl-operator">,</span> m<span class="org-mlpl-operator">2:</span> <span class="org-mlpl-number">0</span>}<span class="org-mlpl-operator">,</span> readings)
+format(<span class="org-string">"n = {:d}, mean = {:.4f}, var = {:.4f}"</span><span class="org-mlpl-operator">,</span> stats<span class="org-mlpl-operator">.</span>n<span class="org-mlpl-operator">,</span> stats<span class="org-mlpl-operator">.</span><span class="org-mlpl-builtin">mean</span><span class="org-mlpl-operator">,</span> stats<span class="org-mlpl-operator">.</span>var)
+</pre>
+</div>
+
+<pre class="example">
+n = 6, mean = 0.5333, var = 0.0865
+</pre>
+
+
+<p>
+The second reducer is a four-bin histogram, configured by partial
+application (the bin count is bound first). Same cleaning transducer,
+untouched:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-mlpl">def u<span class="org-mlpl-operator">:</span>hist_step(k<span class="org-mlpl-operator">,</span> counts<span class="org-mlpl-operator">,</span> x) {
+  <span class="org-string">"Histogram step: add one to the bin of `x` in [0, 1] (the top edge joins the last bin)."</span>
+  bin <span class="org-mlpl-operator">=</span> floor(x * k) <span class="org-mlpl-operator">-</span> (x &gt;<span class="org-mlpl-operator">=</span> <span class="org-mlpl-number">1</span>)
+  counts <span class="org-mlpl-operator">+</span> (<span class="org-mlpl-builtin">iota</span>(k) <span class="org-mlpl-operator">==</span> bin)
+}
+<span class="org-mlpl-builtin">hist</span> <span class="org-mlpl-operator">=</span> u<span class="org-mlpl-operator">:</span>transduce(clean<span class="org-mlpl-operator">,</span> u<span class="org-mlpl-operator">:</span>reducer(call(<span class="org-mlpl-operator">:</span>u<span class="org-mlpl-operator">:</span>hist_step<span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">4</span>))<span class="org-mlpl-operator">,</span> <span class="org-mlpl-builtin">zeros</span>([<span class="org-mlpl-number">4</span>])<span class="org-mlpl-operator">,</span> readings)
+<span class="org-mlpl-builtin">hist</span>
+</pre>
+</div>
+
+<pre class="example">
+2 0 2 2
+</pre>
+
+
+<p>
+Six of the ten readings survive cleaning; both the statistics and the
+histogram see exactly those seven, because they share one definition of
+"clean".
+</p>
+</div>
+</div>
+<div id="outline-container-org014ee26" class="outline-2">
+<h2 id="org014ee26"><span class="section-number-2">7.</span> Benefit 4 &#x2013; and the honest limit: the array idiom</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+MLPL is an array language, and for data that is already one array in
+memory its native idiom is a mask and a reduction:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-mlpl">v <span class="org-mlpl-operator">=</span> <span class="org-mlpl-builtin">iota</span>(<span class="org-mlpl-number">10</span>)
+odd <span class="org-mlpl-operator">=</span> v <span class="org-mlpl-operator">-</span> <span class="org-mlpl-number">2</span> * floor(v <span class="org-mlpl-operator">/</span> <span class="org-mlpl-number">2</span>) <span class="org-mlpl-operator">==</span> <span class="org-mlpl-number">1</span>
+<span class="org-mlpl-builtin">reduce_add</span>(compress(odd<span class="org-mlpl-operator">,</span> v) * compress(odd<span class="org-mlpl-operator">,</span> v))
+</pre>
+</div>
+
+<pre class="example">
+165
+</pre>
+
+
+<p>
+That is the same 165 as <code>odd_squares</code> into <code>sum_rf</code>. Two things are
+worth knowing about it.
+</p>
+
+<p>
+First, a mask is not always enough. The tempting <code>reduce_add(mask *
+data)</code> is <i>wrong</i> for the cleaning example: <code>0 * NaN</code> is still <code>NaN</code>, so
+one missing value poisons the whole sum. <code>compress(mask, data)</code> &#x2013;
+selecting instead of zeroing &#x2013; is the correct array-idiom filter:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-mlpl">ok <span class="org-mlpl-operator">=</span> readings <span class="org-mlpl-operator">==</span> readings and readings &gt;<span class="org-mlpl-operator">=</span> <span class="org-mlpl-number">0</span> and readings <span class="org-mlpl-operator">&lt;=</span> <span class="org-mlpl-number">50</span>
+print(<span class="org-mlpl-builtin">reduce_add</span>(ok * readings))
+<span class="org-mlpl-builtin">reduce_add</span>(compress(ok<span class="org-mlpl-operator">,</span> readings))
+</pre>
+</div>
+
+<pre class="example">
+NaN
+160
+</pre>
+
+
+<p>
+Second, speed. On this interpreter the whole-array form is the clear
+winner for in-memory data: one <code>compress</code> and one <code>reduce_add</code> run as
+native loops, while a transducer makes several interpreted function
+calls per item. Measured on 100,000 integers (release build, one core):
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">form</th>
+<th scope="col" class="org-left">time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><code>compress</code> + <code>reduce_add</code> (whole array)</td>
+<td class="org-left">0.01 s</td>
+</tr>
+
+<tr>
+<td class="org-left">transducer over one 100,000-item array</td>
+<td class="org-left">15.9 s</td>
+</tr>
+
+<tr>
+<td class="org-left">index loop over 100 chunks of 1,000</td>
+<td class="org-left">0.28 s</td>
+</tr>
+
+<tr>
+<td class="org-left">index loop over one 100,000-item array</td>
+<td class="org-left">6.4 s</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+The last two rows explain the second: reading item <code>i</code> of an array with
+<code>at(v, i)</code> copies the argument, so an item-at-a-time loop over one huge
+array is quadratic here. Over chunks the same loop is linear &#x2013; which is
+exactly how a transducer meets a stream.
+</p>
+
+<p>
+So the division of labour is:
+</p>
+
+<ul class="org-ul">
+<li><b>Whole arrays already in memory:</b> use masks, <code>compress</code>, and
+reductions. They are faster and just as clear.</li>
+<li><b>Streams, early exit, and reuse:</b> use transducers. Data that arrives
+in chunks, pipelines that should stop as soon as they have an answer
+(<code>taking</code>), and algorithms that must be written once and pointed at
+many sources and sinks are where separating "what to do to each item"
+from "where items come from" and "what to build" pays off.</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orga142cfd" class="outline-2">
+<h2 id="orga142cfd"><span class="section-number-2">8.</span> Summary</h2>
+<div class="outline-text-2" id="text-8">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">piece</th>
+<th scope="col" class="org-left">MLPL form</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">reducer</td>
+<td class="org-left">record <code>{start, step, done}</code> of callables</td>
+</tr>
+
+<tr>
+<td class="org-left">transducer</td>
+<td class="org-left">partial <code>call(:u:mapping, f)</code> &#x2013; a function of a reducer</td>
+</tr>
+
+<tr>
+<td class="org-left">composition</td>
+<td class="org-left"><code>u:comp(a, b)</code> &#x2013; a partial of <code>u:comp_xf</code></td>
+</tr>
+
+<tr>
+<td class="org-left">early exit</td>
+<td class="org-left"><code>u:reduced(acc)</code> marker, checked by <code>u:fold</code></td>
+</tr>
+
+<tr>
+<td class="org-left">stateful step</td>
+<td class="org-left">state carried in the accumulator, unwrapped by <code>done</code></td>
+</tr>
+
+<tr>
+<td class="org-left">source</td>
+<td class="org-left">anything <code>u:size</code> / <code>u:item</code> understand, or chunks</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Two language features did all the work: partial application, which
+turns a many-argument function into a value waiting for the rest of its
+arguments, and records, which bundle the three steps of a reducer (and
+any state a stateful transducer needs) into one value. Neither closures
+nor mutable state were required.
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: MLPL</p>
+<p class="date">Created: 2026-10-02 Fri 13:04</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
