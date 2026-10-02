@@ -1,8 +1,9 @@
 number = 6
 slug = "transducers-literate"
-status = "in-progress"
+status = "completed"
 description = "New literate document examples/literate/transducers.org (+ its tangled .mlpl,..."
 role = "production"
 context_files = []
 created_at = "2026-09-29T10:31:14"
-commits = []
+completed_at = "2026-10-02T13:28:11"
+commits = ["8195f5b083c026449b92f65d176e1209477553f4"]
