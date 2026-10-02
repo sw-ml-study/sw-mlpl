@@ -18,6 +18,7 @@ use crate::{Ctx, LowerError, lower_expr};
 /// the runtime (the bit ops validate arity inside their dispatch).
 enum Arity {
     Exactly(usize),
+    AtLeast(usize),
     Any,
 }
 
@@ -67,9 +68,12 @@ enum Emit {
     /// scalar `DenseArray` 1.0/0.0 (CVal derives `PartialEq`).
     TypeOf,
     Equal,
-    /// The `str_*` family on `CVal::Str` (`str_len`/`str_concat`/
-    /// `str_find`/`str_slice`/`str_split`/`str_eq`), dispatched by name.
+    /// The `str_*` family on `CVal::Str` (`str_len`/`str_find`/
+    /// `str_slice`/`str_split`/`str_eq`), dispatched by name.
     StrOp,
+    /// `rt::<name>(vec![<cval args>...])` -- the variadic text builtins
+    /// (`format`, `write`, `str_concat`); the minimum arity is the row's.
+    CvalVariadic,
 }
 
 /// One registry row: which builtin names at which arity lower with
@@ -82,7 +86,7 @@ struct Spec {
 
 /// Build the registry from compact `[names] @ arity => Emit` rows.
 /// One line per builtin; `@ any` is `Arity::Any`, `@ N` is
-/// `Arity::Exactly(N)`. Keeps the config dense as the surface grows.
+/// `Arity::Exactly(N)`, `@ (N..)` is `Arity::AtLeast(N)`. Keeps the config dense as the surface grows.
 macro_rules! builtins {
     ( $( [ $($n:literal),+ ] @ $arity:tt => $emit:ident );+ $(;)? ) => {
         &[ $( Spec {
@@ -92,6 +96,7 @@ macro_rules! builtins {
         } ),+ ]
     };
     (@arity any) => { Arity::Any };
+    (@arity ($n:literal ..)) => { Arity::AtLeast($n) };
     (@arity $n:literal) => { Arity::Exactly($n) };
 }
 
@@ -122,7 +127,9 @@ const REGISTRY: &[Spec] = builtins! {
     ["type_of"] @ 1 => TypeOf;
     ["equal"] @ 2 => Equal;
     ["str_len"] @ 1 => StrOp;
-    ["str_concat", "str_find", "str_split", "str_eq"] @ 2 => StrOp;
+    ["str_find", "str_split", "str_eq"] @ 2 => StrOp;
+    ["format", "write"] @ (1..) => CvalVariadic;
+    ["str_concat"] @ (2..) => CvalVariadic;
     ["str_slice"] @ 3 => StrOp;
     ["band", "bor", "bxor", "bnot", "popcount", "shl", "shr", "bmask", "bits", "from_bits"] @ any => BitCall;
 };
@@ -160,6 +167,7 @@ pub(crate) fn lower_fncall(
     let spec = REGISTRY.iter().find(|s| {
         let arity_ok = match s.arity {
             Arity::Exactly(n) => n == arity,
+            Arity::AtLeast(n) => arity >= n,
             Arity::Any => true,
         };
         arity_ok && s.names.contains(&name)
@@ -209,6 +217,14 @@ pub(crate) fn lower_fncall(
         Emit::CvalIo => {
             let (a, f) = (crate::lower_cval(ctx, &args[0])?, format_ident!("{name}"));
             Ok(quote! { #rt::#f(&(#a)) })
+        }
+        Emit::CvalVariadic => {
+            let a: Vec<TokenStream> = args
+                .iter()
+                .map(|a| crate::lower_cval(ctx, a))
+                .collect::<Result<_, _>>()?;
+            let f = format_ident!("{name}");
+            Ok(quote! { #rt::#f(vec![#(#a),*]) })
         }
         Emit::Args => Ok(quote! { #rt::cli_args() }),
         Emit::ReadStdin => Ok(quote! { #rt::read_stdin() }),
@@ -310,10 +326,6 @@ pub(crate) fn lower_fncall(
                 "str_len" => Ok(quote! {
                     #rt::DenseArray::from_scalar((#s).str().chars().count() as f64)
                 }),
-                "str_concat" => {
-                    let b = crate::lower_cval(ctx, &args[1])?;
-                    Ok(quote! { #rt::CVal::Str(format!("{}{}", (#s).str(), (#b).str())) })
-                }
                 "str_eq" => {
                     let b = crate::lower_cval(ctx, &args[1])?;
                     Ok(quote! { #rt::DenseArray::from_scalar({

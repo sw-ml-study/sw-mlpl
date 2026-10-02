@@ -50,6 +50,44 @@ pub fn disp(v: &CVal) -> CVal {
     }
 }
 
+/// `format(template, args...)` -- Python `str.format` replacement fields
+/// via the shared `mlpl-format` engine. A scalar is a number, a string is
+/// text, any other value formats as its display (interpreter parity).
+///
+/// # Panics
+/// Panics (a hard error, as in the interpreter) on a non-string template
+/// or a template / spec error, with the formatter's message.
+#[must_use]
+pub fn format(vals: Vec<CVal>) -> CVal {
+    let mut vals = vals.into_iter();
+    let Some(CVal::Str(template)) = vals.next() else {
+        panic!("format: the first argument must be the template string");
+    };
+    let args: Vec<mlpl_format::FmtArg> = vals
+        .map(|v| match v {
+            CVal::Arr(a) if a.rank() == 0 => mlpl_format::FmtArg::Num(a.data()[0]),
+            CVal::Str(s) => mlpl_format::FmtArg::Text(s),
+            other => mlpl_format::FmtArg::Text(other.to_string()),
+        })
+        .collect();
+    CVal::Str(mlpl_format::format(&template, &args).unwrap_or_else(|e| panic!("format: {e}")))
+}
+
+/// `str_concat(a, b, ...)` -- two or more strings joined. No coercion.
+///
+/// # Panics
+/// Panics on a non-string argument, naming its position.
+#[must_use]
+pub fn str_concat(vals: Vec<CVal>) -> CVal {
+    let parts = vals.iter().enumerate().map(|(i, v)| match v {
+        CVal::Str(s) => s.as_str(),
+        _ => {
+            panic!("str_concat: argument {i} must be a string, got {v:?} (no coercion; use format)")
+        }
+    });
+    CVal::Str(parts.collect())
+}
+
 /// `to_int(s)` -- parse a string as an integer -> `ok(int)` / `err`.
 ///
 /// # Panics

@@ -66,6 +66,22 @@ pub fn write_stdout(v: &CVal) -> CVal {
     }
 }
 
+/// `write(v, ...)` -- `print` without the newline: each value's display
+/// text concatenated, written to stdout and flushed (so `\r` progress
+/// lines update in place). Returns the text written (interpreter parity).
+///
+/// # Panics
+/// Panics if stdout cannot be written.
+#[must_use]
+pub fn write(vals: Vec<CVal>) -> CVal {
+    let text: String = vals.iter().map(ToString::to_string).collect();
+    let mut out = std::io::stdout();
+    out.write_all(text.as_bytes())
+        .and_then(|()| out.flush())
+        .unwrap_or_else(|e| panic!("write: {e}"));
+    CVal::Str(text)
+}
+
 /// `args()` -- the process command-line arguments (excluding
 /// argv[0]) as a `CVal::StrList`.
 #[must_use]

@@ -52,6 +52,8 @@ const CVAL_BUILTINS: &[&str] = &[
     "read_stdin_chunk",
     "type_of",
     "str_concat",
+    "format",
+    "write",
     "str_slice",
     "str_split",
 ];

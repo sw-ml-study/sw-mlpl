@@ -6,11 +6,11 @@
 
 use std::collections::HashSet;
 
-use mlpl_parser::Expr;
+use mlpl_parser::{BinOpKind, Expr};
 use proc_macro2::TokenStream;
 use quote::quote;
 
-use crate::{Ctx, LowerError, fndef_lower, lower_expr};
+use crate::{Ctx, LowerError, fndef_lower, lower_darr, lower_expr};
 
 /// Pre-pass: the bare names of user functions whose body produces a
 /// `CVal` -- it builds a record, calls `ok`/`err`, or uses `?`
@@ -39,6 +39,7 @@ fn expr_has_cval_marker(e: &Expr) -> bool {
             matches!(name.as_str(), "ok" | "err" | "check") || any(args)
         }
         Expr::Assign { value: e, .. }
+        | Expr::Destructure { value: e, .. }
         | Expr::UnaryNeg { operand: e, .. }
         | Expr::FieldAccess { receiver: e, .. }
         | Expr::Return { value: Some(e), .. } => expr_has_cval_marker(e),
@@ -68,6 +69,57 @@ pub(crate) fn lower_if(
     let t = fndef_lower::lower_body(ctx, then_body, false)?;
     let e = fndef_lower::lower_body(ctx, else_body, false)?;
     Ok(quote! { if (#c).data()[0] != 0.0 { #t } else { #e } })
+}
+
+/// Lower an infix operator to an elementwise `apply_binop` (scalar
+/// broadcasting). `and` / `or` keep the interpreter's control flow: a
+/// scalar left side that decides the result short-circuits -- the right
+/// side is not evaluated -- else the result is the 0/1 mask.
+pub(crate) fn lower_binop(
+    ctx: &Ctx,
+    op: &BinOpKind,
+    lhs: &Expr,
+    rhs: &Expr,
+) -> Result<TokenStream, LowerError> {
+    let (l, r, rt) = (lower_darr(ctx, lhs)?, lower_darr(ctx, rhs)?, &ctx.rt);
+    let closure = binop_closure(op);
+    // UFCS through the runtime facade's re-exported trait, so the
+    // generated call site needs no `use ApplyBinopExt`.
+    let apply = |l: TokenStream| quote! { #rt::ApplyBinopExt::apply_binop(&(#l), &(#r), #closure).unwrap() };
+    let decides = match op {
+        BinOpKind::And => false,
+        BinOpKind::Or => true,
+        _ => return Ok(apply(l)),
+    };
+    let masked = apply(quote! { __l });
+    Ok(quote! {{
+        let __l = #l;
+        if __l.rank() == 0 && (__l.data()[0] != 0.0) == #decides {
+            #rt::DenseArray::from_scalar(if #decides { 1.0 } else { 0.0 })
+        } else {
+            #masked
+        }
+    }})
+}
+
+/// The elementwise `f64` closure for an operator; comparisons and the
+/// logical operators yield 0/1 (`eq` within `f64::EPSILON`).
+fn binop_closure(op: &BinOpKind) -> TokenStream {
+    let cmp = |t: TokenStream| quote! { |__a: f64, __b: f64| if #t { 1.0 } else { 0.0 } };
+    match op {
+        BinOpKind::Add => quote! { |__a, __b| __a + __b },
+        BinOpKind::Sub => quote! { |__a, __b| __a - __b },
+        BinOpKind::Mul => quote! { |__a, __b| __a * __b },
+        BinOpKind::Div => quote! { |__a, __b| __a / __b },
+        BinOpKind::Lt => cmp(quote! { __a < __b }),
+        BinOpKind::Gt => cmp(quote! { __a > __b }),
+        BinOpKind::Le => cmp(quote! { __a <= __b }),
+        BinOpKind::Ge => cmp(quote! { __a >= __b }),
+        BinOpKind::Eq => cmp(quote! { (__a - __b).abs() < f64::EPSILON }),
+        BinOpKind::Ne => cmp(quote! { (__a - __b).abs() >= f64::EPSILON }),
+        BinOpKind::And => cmp(quote! { __a != 0.0 && __b != 0.0 }),
+        BinOpKind::Or => cmp(quote! { __a != 0.0 || __b != 0.0 }),
+    }
 }
 
 /// Lower `while cond { body }`. The condition is re-evaluated each

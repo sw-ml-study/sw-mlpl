@@ -2282,6 +2282,7 @@ name = "mlpl-rt-value"
 version = "0.22.0"
 dependencies = [
  "mlpl-array",
+ "mlpl-format",
 ]
 
 [[package]]

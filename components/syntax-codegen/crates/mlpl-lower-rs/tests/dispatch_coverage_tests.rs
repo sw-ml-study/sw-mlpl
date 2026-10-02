@@ -87,6 +87,9 @@ enum Builtin {
     StrSlice,
     StrSplit,
     StrEq,
+    StrConcatMany,
+    Format,
+    Write,
 }
 
 const ALL: &[Builtin] = &[
@@ -150,6 +153,9 @@ const ALL: &[Builtin] = &[
     Builtin::StrSlice,
     Builtin::StrSplit,
     Builtin::StrEq,
+    Builtin::StrConcatMany,
+    Builtin::Format,
+    Builtin::Write,
 ];
 
 impl Builtin {
@@ -218,6 +224,9 @@ impl Builtin {
             Builtin::StrSlice => "str_slice(\"hi\", 0, 1)",
             Builtin::StrSplit => "str_split(\"a,b\", \",\")",
             Builtin::StrEq => "str_eq(\"a\", \"a\")",
+            Builtin::StrConcatMany => "str_concat(\"a\", \"b\", \"c\")",
+            Builtin::Format => "format(\"{} = {:.2f}\", \"x\", 1.5)",
+            Builtin::Write => "write(\"n = \", 3)",
         }
     }
 
@@ -282,6 +291,9 @@ impl Builtin {
             Builtin::StrSlice => "str_slice",
             Builtin::StrSplit => "str_split",
             Builtin::StrEq => "str_eq",
+            Builtin::StrConcatMany => "str_concat",
+            Builtin::Format => "format",
+            Builtin::Write => "write",
         }
     }
 }

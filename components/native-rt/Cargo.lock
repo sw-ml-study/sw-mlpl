@@ -359,8 +359,21 @@ dependencies = [
  "mlpl-array-ops-matmul",
  "mlpl-array-ops-reduce",
  "mlpl-array-ops-shape",
+ "mlpl-autograd-backward",
  "mlpl-autograd-tape",
  "mlpl-core",
+ "mlpl-tensor-handle",
+]
+
+[[package]]
+name = "mlpl-autograd-backward"
+version = "0.22.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-array-ops-compose",
+ "mlpl-array-ops-matmul",
+ "mlpl-array-ops-shape",
+ "mlpl-autograd-tape",
  "mlpl-tensor-handle",
 ]
 
@@ -383,6 +396,10 @@ version = "0.22.0"
 dependencies = [
  "serde",
 ]
+
+[[package]]
+name = "mlpl-format"
+version = "0.22.0"
 
 [[package]]
 name = "mlpl-mlx-forward"
@@ -452,6 +469,7 @@ name = "mlpl-rt-value"
 version = "0.22.0"
 dependencies = [
  "mlpl-array",
+ "mlpl-format",
 ]
 
 [[package]]

@@ -1,6 +1,6 @@
 number = 5
 slug = "compiler-parity"
-status = "pending"
+status = "in-progress"
 description = "readable-scripts step 5: lower format, write, variadic str_concat, and/or/not..."
 role = "production"
 context_files = []

@@ -153,3 +153,25 @@ reduce_add(reduce_add(M, \"c\"))";
     let got = compile_and_run(src);
     assert!((got - 15.0).abs() < 1e-9, "expected 15.0, got {got}");
 }
+
+#[test]
+fn readable_scripts_compile_and_evaluate() {
+    if !should_run() {
+        eprintln!("skipping end-to-end compile test; set MLPL_LOWER_RS_COMPILE_TESTS=1 to run");
+        return;
+    }
+    // Destructuring (with rename), format, variadic str_concat, `not`,
+    // and scalar short-circuit: a `write` on the right of a decided
+    // `and` / `or` must not run (its text would break the f64 parse).
+    // 2 * 5 + 6 + 6 + 0 + 1 + 1 = 24
+    let src = "\
+{a, b: x} = {a: 2, b: 5}
+n = str_len(format(\"{:>6}\", a))
+m = str_len(str_concat(\"a\", \"bc\", \"def\"))
+s = 0 and str_len(write(\"BAD\"))
+t = 1 or str_len(write(\"BAD\"))
+u = not 0
+a * x + n + m + s + t + u";
+    let got = compile_and_run(src);
+    assert!((got - 24.0).abs() < 1e-9, "expected 24.0, got {got}");
+}

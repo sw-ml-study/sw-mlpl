@@ -16,23 +16,29 @@ which asserts every registered builtin actually lowers.
 ## What compiles
 
 - **Arithmetic + operators**: `+ - * /`, unary minus, and the infix
-  comparisons `< > <= >= == !=` (0/1 masks), with length-1 broadcast.
+  comparisons `< > <= >= == !=` (0/1 masks), with length-1 broadcast;
+  `and` / `or` / `not`, with the interpreter's scalar short-circuit (a
+  deciding scalar left side skips the right side) and elementwise
+  masks otherwise.
 - **Control flow**: `if` / `else`, `while`, `break`/`continue` inside a
   `while`, `?` (Result propagation).
 - **User functions**: `def u:name(...)` and calls. (Namespaces beyond
   `u:` are interpreter-only for now -- see below.)
-- **Values**: numbers, strings, records + field access, `ok`/`err`
+- **Values**: numbers, strings, records + field access, record
+  destructuring `{a, b: x} = r` (string or numeric fields), `ok`/`err`
   Results, `StrList` literals, `Bytes`.
 - **Array ops**: `shape`, `rank`, `transpose`, `reshape`,
   `reshape_labeled`, `label`/`relabel`, `reduce_add` (+ axis),
   `matmul`, `iota`/`range`, `tally`, `take`, `at`, `floor`,
   `type_of`, `equal`.
 - **Bit ops**: `band bor bxor bnot popcount shl shr bmask bits from_bits`.
-- **String ops**: `str_len str_concat str_find str_slice str_split`,
-  `tokenize_bytes`, `decode_bytes`, `to_int`, `disp`.
+- **String ops**: `str_len str_concat` (2+ args) `str_find str_slice
+  str_split`, `format` (the same format-spec engine as the
+  interpreter), `tokenize_bytes`, `decode_bytes`, `to_int`, `disp`.
 - **I/O**: `read_bytes` (whole + range), `write_bytes`, `append_bytes`,
-  `file_size`; `read_stdin`, `read_stdin_chunk`; `print`, `eprint`,
-  `exit`, `args`, `arg` -- with pristine stdout (`finish_program`).
+  `file_size`; `read_stdin`, `read_stdin_chunk`; `print`, `eprint`
+  (one argument), `write` (any number), `exit`, `args`, `arg` -- with
+  pristine stdout (`finish_program`).
 
 The definitive list is the `REGISTRY` in `mlpl-lower-rs/src/fncall.rs`
 (operators are lowered directly, not via the registry).
@@ -47,6 +53,12 @@ The definitive list is the `REGISTRY` in `mlpl-lower-rs/src/fncall.rs`
 - **`for` / `repeat`** row iteration (only `if`/`while` lower today).
 - **`StrList` / `du` builtins** -- `list_len`, `list_get`, `fs_walk`,
   `concat` (queued: du-list-fs).
+- **Multi-argument `print` / `eprint`** (space-joined) -- the
+  compiler lowers the one-argument form; `write` and `format` cover
+  the multi-value cases.
+- **Record-valued user-function parameters** -- compiled `u:`
+  parameters are arrays, so a function destructures or reads records it
+  builds, not records passed in.
 - **Remaining pure array / codec builtins** -- `gather_rows`,
   `compress`, `grade_up`/`grade_down`, `rotate`, `flatten`, `sort`,
   JSON/TOML codecs. Each is "port to `mlpl-rt` + one registry row".

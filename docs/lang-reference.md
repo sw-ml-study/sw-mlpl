@@ -223,7 +223,9 @@ are local like any other assignment. The statement's value is the
 record. A `{` that starts a statement is a pattern only when every
 entry is `name` or `name: name` and `=` follows the closing brace;
 otherwise it is a record literal. Destructuring is not available
-inside the body a `grad` traces -- read `r.field` there.
+inside the body a `grad` traces -- read `r.field` there. Compiled
+binaries support destructuring as a statement (string or numeric
+fields); it cannot be a function body's final statement there.
 
 ## Function Calls
 
@@ -887,8 +889,8 @@ the trained Pets demos.
 | `apply_tokenizer(tok, text)` | 2 | Encode `text` (a `Value::Str`) through a trained tokenizer; returns a rank-1 integer array. |
 | `decode(tok, tokens)` | 2 | Inverse of `apply_tokenizer`. For every byte string `s`, `decode(tok, apply_tokenizer(tok, s)) == s`. |
 | `decode_bytes(tokens)` | 1 | Inverse of `tokenize_bytes`; returns a `Value::Str`. |
-| `format(template, args...)` | 1+ | Python `str.format`-style formatting to a string. Fields: `{}` (next argument), `{0}` (by position; do not mix with `{}`), `{{` / `}}` for literal braces. Spec after `:` -- `[[fill]align][sign][#][0][width][,][.precision][type]`: align `<` `>` `^` (`=` pads after the sign); sign `+` / ` `; `0` zero-pads; `,` groups thousands; types `d` (integer), `x` `X` `b` `o` (radix, `#` adds `0x` / `0b` / `0o`), `f` (fixed, 6 digits by default), `e` `E` (exponent), `g` `G` (general), `%` (percent), `s`. `{}` alone displays a number as MLPL does (`5`, `2.5`); strings align left and numbers right by default; a non-scalar value formats as its display text. `format("step {:4d} / {:4d} | loss {:.4f}", step + 1, n, loss)`. A missing argument, a non-integer for `d`, or a string for a numeric type is an error naming the field and argument. |
-| `str_concat(a, b, ...)` | 2+ | Join two or more strings (`Value::Str`) in order, exact and Unicode-preserving: `str_concat(first, " ", last)`. No coercion: a non-string argument is an error naming its position (use `format` to mix in numbers). |
+| `format(template, args...)` | 1+ | Python `str.format`-style formatting to a string. Fields: `{}` (next argument), `{0}` (by position; do not mix with `{}`), `{{` / `}}` for literal braces. Spec after `:` -- `[[fill]align][sign][#][0][width][,][.precision][type]`: align `<` `>` `^` (`=` pads after the sign); sign `+` / ` `; `0` zero-pads; `,` groups thousands; types `d` (integer), `x` `X` `b` `o` (radix, `#` adds `0x` / `0b` / `0o`), `f` (fixed, 6 digits by default), `e` `E` (exponent), `g` `G` (general), `%` (percent), `s`. `{}` alone displays a number as MLPL does (`5`, `2.5`); strings align left and numbers right by default; a non-scalar value formats as its display text. `format("step {:4d} / {:4d} | loss {:.4f}", step + 1, n, loss)`. A missing argument, a non-integer for `d`, or a string for a numeric type is an error naming the field and argument. Also available in compiled binaries, with the same formatter. |
+| `str_concat(a, b, ...)` | 2+ | Join two or more strings (`Value::Str`) in order, exact and Unicode-preserving: `str_concat(first, " ", last)`. No coercion: a non-string argument is an error naming its position (use `format` to mix in numbers). Also available in compiled binaries. |
 | `str_join(parts, separator)` | 2 | Join a string list `parts` (each a `Value::Str`) with `separator` (a `Value::Str`) into one string. Linear in the total length -- the O(total) fold, not an O(n^2) reduce. `[]` yields `""`. |
 | `str_len(s)` | 1 | The number of CHARACTERS (Unicode scalar values) in `s`, not bytes -- a multi-byte UTF-8 character counts once. |
 | `str_slice(s, start, len)` | 3 | The `len`-character substring of `s` starting at character index `start` (both non-negative integers). Character-indexed, not byte-indexed; a `len` past the end clamps. |
@@ -1033,7 +1035,7 @@ explicitly on failure via `is_ok` / `unwrap_or` / `err_message`.
 | Function | Args | Description |
 |----------|------|-------------|
 | `print(v, ...)` | 1+ | Write each argument's display form to stdout, space-joined (println-style), then a newline. Returns the last argument (so `print(v)` still yields `v`). Variadic, so labelled output works without string concatenation: `print("count:", n)` prints `count: 3`. The display form matches what the REPL prints for each value's type. |
-| `write(v, ...)` | 1+ | `print` without the newline: each argument's display form, concatenated with no separator, written to stdout and flushed (so a `"\r"` progress line updates in place). Returns the text it wrote. `write(format("step {:4d} | loss {:.4f}\r", step, loss))`. |
+| `write(v, ...)` | 1+ | `print` without the newline: each argument's display form, concatenated with no separator, written to stdout and flushed (so a `"\r"` progress line updates in place). Returns the text it wrote. `write(format("step {:4d} | loss {:.4f}\r", step, loss))`. Also available in compiled binaries. |
 | `eprint(v, ...)` | 1+ | Same as `print` but writes to stderr. Useful for diagnostics that should not interleave with the script's main output stream. |
 | `to_number(s)` | 1 | Parse `s` (a `Value::Str`) as an `f64`. Returns `Ok(scalar)` on success; `Err("to_number: cannot parse \"abc\" as a number")` on failure. Leading/trailing whitespace is trimmed. |
 | `to_string(x)` | 1 | The inverse of `to_number`: format a SCALAR number as its shortest round-trip decimal, using the same formatting `to_json` gives a scalar. Integral values print bare (`to_string(8 / 2)` is `"4"`, not `"4.0"`); `to_number(to_string(x))` recovers `x` for every finite `f64`. A non-scalar or non-number is a hard error. Rounding for display belongs in a library (`to_string(round(x * 100) / 100)`). |

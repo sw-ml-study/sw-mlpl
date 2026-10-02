@@ -3,7 +3,7 @@
 //! control flow in `control_lower`, user functions in `fndef_lower`,
 //! builtin calls in `fncall`; lib.rs is a facade.
 
-use mlpl_parser::{BinOpKind, Expr};
+use mlpl_parser::Expr;
 use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote};
 
@@ -82,6 +82,15 @@ fn lower_stmt(
         bindings.push(fndef_lower::lower_user_fn(ctx, name, params, body)?);
         return Ok(None);
     }
+    if let Expr::Destructure {
+        bindings: fields,
+        value,
+        ..
+    } = stmt
+    {
+        bindings.push(fndef_lower::lower_destructure(ctx, fields, value)?);
+        return Ok(is_last.then(|| quote! { __mlpl_destructure.clone() }));
+    }
     if is_last {
         return Ok(Some(lower_cval(ctx, stmt)?));
     }
@@ -151,38 +160,7 @@ pub(crate) fn lower_expr(ctx: &Ctx, expr: &Expr) -> Result<TokenStream, LowerErr
             let inner = lower_darr(ctx, operand)?;
             Ok(quote! { (#inner).map(|__v| -__v) })
         }
-        Expr::BinOp { op, lhs, rhs, .. } => {
-            let l = lower_darr(ctx, lhs)?;
-            let r = lower_darr(ctx, rhs)?;
-            let closure = match op {
-                BinOpKind::Add => quote! { |__a, __b| __a + __b },
-                BinOpKind::Sub => quote! { |__a, __b| __a - __b },
-                BinOpKind::Mul => quote! { |__a, __b| __a * __b },
-                BinOpKind::Div => quote! { |__a, __b| __a / __b },
-                BinOpKind::Lt => quote! { |__a, __b| if __a < __b { 1.0 } else { 0.0 } },
-                BinOpKind::Gt => quote! { |__a, __b| if __a > __b { 1.0 } else { 0.0 } },
-                BinOpKind::Le => quote! { |__a, __b| if __a <= __b { 1.0 } else { 0.0 } },
-                BinOpKind::Ge => quote! { |__a, __b| if __a >= __b { 1.0 } else { 0.0 } },
-                BinOpKind::Eq => quote! {
-                    |__a: f64, __b: f64| if (__a - __b).abs() < f64::EPSILON { 1.0 } else { 0.0 }
-                },
-                BinOpKind::Ne => quote! {
-                    |__a: f64, __b: f64| if (__a - __b).abs() >= f64::EPSILON { 1.0 } else { 0.0 }
-                },
-                // Elementwise 0/1 (both sides evaluated; the interpreter's
-                // scalar short-circuit is not lowered here).
-                BinOpKind::And => quote! {
-                    |__a: f64, __b: f64| if __a != 0.0 && __b != 0.0 { 1.0 } else { 0.0 }
-                },
-                BinOpKind::Or => quote! {
-                    |__a: f64, __b: f64| if __a != 0.0 || __b != 0.0 { 1.0 } else { 0.0 }
-                },
-            };
-            let rt = &ctx.rt;
-            // UFCS through the runtime facade's re-exported trait, so
-            // the generated call site needs no `use ApplyBinopExt`.
-            Ok(quote! { #rt::ApplyBinopExt::apply_binop(&(#l), &(#r), #closure).unwrap() })
-        }
+        Expr::BinOp { op, lhs, rhs, .. } => control_lower::lower_binop(ctx, op, lhs, rhs),
         Expr::Ident(name, _) => {
             let id = format_ident!("{name}");
             Ok(quote! { #id.clone() })
@@ -225,7 +203,11 @@ pub(crate) fn lower_expr(ctx: &Ctx, expr: &Expr) -> Result<TokenStream, LowerErr
         | Expr::Continue { .. }
         | Expr::FnDef { .. }
         | Expr::TryCatch { .. }
-        | Expr::Destructure { .. }
         | Expr::Return { .. } => Err(LowerError::Unsupported(format!("{expr:?}"))),
+        Expr::Destructure { .. } => Err(LowerError::Unsupported(
+            "a destructuring assignment where a value is needed (it is a statement; \
+             end the body with an expression)"
+                .into(),
+        )),
     }
 }

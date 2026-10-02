@@ -16,8 +16,8 @@ mod text;
 mod value;
 
 pub use finish::finish_program;
-pub use io::{arg, array_to_bytes, cli_args, write_stdout};
+pub use io::{arg, array_to_bytes, cli_args, write, write_stdout};
 pub use proc::{eprint, exit, print, read_stdin};
 pub use stdin_chunk::read_stdin_chunk;
-pub use text::{decode_bytes, disp, to_int, tokenize_bytes};
+pub use text::{decode_bytes, disp, format, str_concat, to_int, tokenize_bytes};
 pub use value::CVal;

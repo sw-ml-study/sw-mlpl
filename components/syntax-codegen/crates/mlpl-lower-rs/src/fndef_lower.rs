@@ -83,6 +83,9 @@ pub(crate) fn lower_body(
                     quote! { #id = #val; }
                 });
             }
+            Expr::Destructure {
+                bindings, value, ..
+            } if i != last => binds.push(lower_destructure(ctx, bindings, value)?),
             Expr::Return { value: Some(v), .. } => {
                 let ts = valued(v, true)?;
                 binds.push(quote! { return #ts; });
@@ -97,14 +100,45 @@ pub(crate) fn lower_body(
     Ok(quote! { { #(#binds)* #tail } })
 }
 
+/// Lower `{a, b: x} = value` to a record temporary plus one binding per
+/// field. Each variable holds the field as a `CVal` (so string and
+/// numeric fields both work; a numeric use bridges via `lower_darr`). A
+/// missing field or a non-record value is a runtime panic -- the
+/// interpreter's hard error.
+pub(crate) fn lower_destructure(
+    ctx: &Ctx,
+    bindings: &[(String, String)],
+    value: &Expr,
+) -> Result<TokenStream, LowerError> {
+    let rec = lower_cval(ctx, value)?;
+    let mut binds: Vec<TokenStream> = Vec::new();
+    for (field, var) in bindings {
+        let id = format_ident!("{var}");
+        ctx.set_cval_binding(var, true);
+        let read = quote! { __mlpl_destructure.field(#field).clone() };
+        binds.push(if ctx.first_binding(var) {
+            quote! { let mut #id = #read; }
+        } else {
+            quote! { #id = #read; }
+        });
+    }
+    Ok(quote! { let __mlpl_destructure = #rec; #(#binds)* })
+}
+
 /// Reject a body that reads any name that is not a parameter or a
 /// body-local binding (a global read), so a compiled function can
 /// never silently diverge from the interpreter's snapshot scope.
 fn check_no_free_vars(params: &[String], body: &[Expr]) -> Result<(), LowerError> {
     let mut bound: HashSet<&str> = params.iter().map(String::as_str).collect();
     for stmt in body {
-        if let Expr::Assign { name, .. } = stmt {
-            bound.insert(name);
+        match stmt {
+            Expr::Assign { name, .. } => {
+                bound.insert(name);
+            }
+            Expr::Destructure { bindings, .. } => {
+                bound.extend(bindings.iter().map(|(_, v)| v.as_str()));
+            }
+            _ => {}
         }
     }
     let mut free: Vec<String> = Vec::new();
@@ -137,7 +171,9 @@ fn collect_free(expr: &Expr, bound: &HashSet<&str>, out: &mut Vec<String>) {
             fields.iter().for_each(|(_, v)| collect_free(v, bound, out));
         }
         Expr::FieldAccess { receiver, .. } => collect_free(receiver, bound, out),
-        Expr::Assign { value, .. } => collect_free(value, bound, out),
+        Expr::Assign { value, .. } | Expr::Destructure { value, .. } => {
+            collect_free(value, bound, out);
+        }
         Expr::Return { value: Some(v), .. } => collect_free(v, bound, out),
         _ => {}
     }

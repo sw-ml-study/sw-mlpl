@@ -37,8 +37,8 @@ pub use mlpl_array::{ArrayError, DenseArray, Shape};
 // re-exported so generated code reaches it as `<rt>::read_bytes` etc.
 pub use mlpl_rt_fsio::{append_bytes, file_size, read_bytes, read_bytes_range, write_bytes};
 pub use mlpl_rt_value::{
-    CVal, arg, cli_args, decode_bytes, disp, eprint, exit, finish_program, print, read_stdin,
-    read_stdin_chunk, to_int, tokenize_bytes, write_stdout,
+    CVal, arg, cli_args, decode_bytes, disp, eprint, exit, finish_program, format, print,
+    read_stdin, read_stdin_chunk, str_concat, to_int, tokenize_bytes, write, write_stdout,
 };
 // The binop / matmul extension traits are re-exported so lowered
 // code can call them via UFCS -- `<rt>::ApplyBinopExt::apply_binop(...)`

@@ -11,3 +11,5 @@ version.workspace = true
 
 [dependencies]
 mlpl-array = { path = "../../../array/crates/mlpl-array" }
+# The pure format-spec engine shared with the interpreter's `format`.
+mlpl-format = { path = "../../../eval-types/crates/mlpl-format" }
