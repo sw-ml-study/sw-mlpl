@@ -12,8 +12,14 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-10-02
+
+- feat(compiler): lower format, write, variadic str_concat, and/or short-circuit, destructuring
+
 ## 2026-09-30
 
+- chore(agentrail): complete 004-record-destructuring
+- docs(changes): refresh CHANGES.md to HEAD
 - feat(lang): record destructuring {a, b: x} = expr
 
 ## 2026-09-29
