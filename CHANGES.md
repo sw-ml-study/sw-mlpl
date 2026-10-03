@@ -12,8 +12,16 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-10-03
+
+- chore(pages): rebuild for readable-scripts glossary updates
+- docs: close readable-scripts (reference, glossary, example, mode, ledgers)
+- docs(readme): link the related language X_eTaL
+
 ## 2026-10-02
 
+- chore(agentrail): complete 006-transducers-literate
+- docs(changes): refresh CHANGES.md to HEAD
 - docs(literate): transducers -- one algorithm, any source, any sink
 - chore(agentrail): complete 005-compiler-parity
 - docs(changes): refresh CHANGES.md to HEAD
