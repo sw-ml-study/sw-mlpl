@@ -420,6 +420,21 @@ every `:`-prefixed command.
 
 ## Related Projects
 
+A related language:
+
+- [X_eTaL](https://github.com/softwarewrighter/X_eTaL)
+  ([live demo](https://softwarewrighter.github.io/X_eTaL/)) -- a
+  sibling array language in the same APL / APL2 / J / BQN tradition,
+  also in Rust, that takes the other fork: it is statically typed and
+  functional, and keeps plain-ASCII source while TYPOGRAPHY carries
+  meaning (an underlined name is a function, a subscript gives its
+  axes, a superscript is an exponent), rendered decorated in its
+  browser editor. MLPL is dynamically typed with function-call
+  syntax and an ML runtime (autograd, models, GPU backends); X_eTaL
+  explores typing, composition, and typographic notation.
+
+MLPL programs and tooling:
+
 - [mlplunit](https://github.com/softwarewrighter/mlplunit) --
   xUnit-style testing framework for MLPL programs (under
   development).
