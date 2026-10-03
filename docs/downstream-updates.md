@@ -39,6 +39,12 @@ All items below are on `main`; the adjacent checkout's
 | a `u:` call costs O(names it writes), not a copy of every global: 0.557 -> 0.0006 ms per call with a 2.28M-element global in scope, now independent of global size (grad-soundness-records step 009) | `expunge` of big globals before hot loops; restructuring to avoid `u:` calls in inner loops (the per-READ copy of a large global is the separate cow-values saga) | microgpt-mlpl (e, call-cost half) |
 | `gather_rows` and `embed` differentiate through a native row gather: O(n x d) forward and backward, independent of the table's row count (20,000 ids into a 50,000-row table: ~10 ms; the old one-hot form needed an 8 GB `[n, V]` matrix) (grad-soundness-records step 010) | mini-batching or vocabulary truncation adopted only because full-batch gathers took ~30 s per step | demo-decision-model (full-batch scorer training), microgpt-mlpl, reasoning-from-scratch embeddings |
 | record field reads inside `grad` are constant leaves, and a record may be passed to a `u:` function called inside the loss (grad-soundness-records step 011) | differentiated entry points that take every field as a separate array argument; binding fields to variables before a traced loss | demo-decision-model (Q5: the 12-argument `lib/` entry points can take one `{ids, wmask, ...}` record), moe-microscope (F17) |
+| `format(template, args...)` -- Python `str.format` fields (`{}`, `{0}`, `{:>8}`, `{:4d}`, `{:.4f}`, `{:e}`, `{:g}`, `{:x}`, `{:,}`, `{:.1%}`, fill / sign / `#` / `0`), errors naming the field and argument; spec table in lang-reference (8bf2033a) | hand-rolled `{:4d}` / fixed-point formatters; `to_string` + padding towers | microgpt-mlpl (#1), moe-microscope, demo-decision-model |
+| `write(v, ...)` -- `print` without the newline, flushed (`\r` progress lines); `str_concat(a, b, ...)` takes 2+ strings and names a non-string argument (bf2c3009) | `unwrap(write_stdout(tokenize_bytes(s)))`; `str_concat(str_concat(` towers (moe-microscope 226, demo-decision-model 44, demo-abstract-algebra 40 nested lines) | microgpt-mlpl (#1), moe-microscope, demo-decision-model, demo-abstract-algebra |
+| `and` / `or` / `not` keywords: Python precedence, short-circuit on scalars (`i < n and at(v, i) > 0` is safe), elementwise 0/1 masks on arrays, stop-gradient masks inside `grad` (44070a49) | `* (1 - done)` / `gt(a + b, 1)` boolean arithmetic; nested `if`s used only to guard an index | microgpt-mlpl (#6), all |
+| record destructuring `{a, b} = r`, `{a, b: x} = r`, `{a, b} = f()?`: atomic (a missing field names itself and the fields present, binds nothing), frame-scoped in `u:` bodies (c55dce4b) | field-by-field `a = r.a` / `b = r.b` unpacking | microgpt-mlpl (#3), all record-returning `lib/` APIs |
+| the compiler (`mlpl-build`) lowers `format`, `write`, variadic `str_concat`, `and` / `or` / `not` with the scalar short-circuit, and destructuring (33a88c9d; boundary in docs/compiler-coverage.md) | interpreter-only branches in scripts that are also compiled | mlpl-build users |
+| Emacs `mlpl-mode` highlights every keyword (`def if else while for in break continue return try catch and or not ...`), not just `repeat` / `train` (readable-scripts relay-close) | local font-lock patches | literate-doc authors |
 
 ## 2. Behavior changes to re-check
 
@@ -61,18 +67,25 @@ changes result:
 - **`get_value` / `get_error` error text changed** (b3180d9a): it now
   names `unwrap(r)` / `err_message(r)`; string-matching tests need
   the new wording.
+- **`and`, `or`, `not` are reserved words** (44070a49). A variable or
+  function parameter with one of those names is now a parse error
+  (none of the 1,658 surveyed downstream files used one; they remain
+  legal as record keys and after `.`). A statement starting with `{`
+  followed by `name, ...} =` is now destructuring, not a record
+  literal (c55dce4b).
+- **`str_concat` error text changed** (bf2c3009): a non-string
+  argument now reports its position ("argument 1 must be a string").
 
 ## 3. In flight and planned: workarounds these will retire
 
-The grad-soundness-records saga's items are all in section 1. Next is
-the Python-ML-developer ergonomics program
+The grad-soundness-records and readable-scripts sagas' items are all
+in section 1. Next in the Python-ML-developer ergonomics program
 (docs/future-sagas-queue.md), each with the pattern it deletes and
 the heaviest users (line counts over downstream `.mlpl`):
 
 | Saga | Adds | Retires | Heaviest users |
 |---|---|---|---|
-| readable-scripts | `format(...)` (Python format specs), `write(s)`, variadic `str_concat`, `and` / `or` / `not`, record destructuring | `str_concat(str_concat(` towers; `* (1 - done)` booleans; field-by-field unpacking; hand-rolled `{:4d}` formatters | moe-microscope 226, demo-decision-model 44, demo-abstract-algebra 40 nested concats |
-| diagnostics-and-repl | `file:line:col` for the failing inner statement; mlpl-mode keywords; `include` in `--babel-session`; REPL line editing, multi-line blocks and `include` at the prompt; aligned matrix printing; `else if` chains | bisecting silent-position errors; duplicated `lib/` in literate docs; `rlwrap` around the REPL; `else { if ... }` nesting | all; demo-coding-agent F7 |
+| diagnostics-and-repl | `file:line:col` for the failing inner statement; `include` in `--babel-session`; REPL line editing, multi-line blocks and `include` at the prompt; aligned matrix printing; `else if` chains | bisecting silent-position errors; duplicated `lib/` in literate docs; `rlwrap` around the REPL; `else { if ... }` nesting | all; demo-coding-agent F7 |
 | tensor-indexing | differentiable `gather(x, idx[, axis])` (rank-1 too), `slice` / `drop`, multi-axis `at(x, i, j)`, `reverse`, `sort` | `reshape(gather_rows(...))` single-index gathers (`u:gather1`), `take(take(`, reshape-gather-flatten sorts, `rotate` + `compress` differences | demo-abstract-algebra 150 / 147, moe-microscope 62, microgpt-mlpl 60 |
 | array-idioms | `sign`, `running_max` / `running_min`, `scan(:u:f, v)`, `partition(mask, v)`, elementwise `max` / `min`, `reduce_max` / `reduce_min` | loops for reduce-scan idioms; `(x > 0) - (x < 0)` signs; `if a > b { a } else { b }` maxima | array-language-comparisons port; transducers literate doc |
 | param-groups | `param_init({...}, seed, std)` returning a name group `adam` / `grad` / `params` accept | inline 9-name `adam` lists; 18-line param declarations | microgpt-mlpl (f) |

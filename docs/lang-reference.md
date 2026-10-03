@@ -900,6 +900,32 @@ the trained Pets demos.
 | `tokenize_bytes(s)` | 1 | Return a rank-1 array of byte indices (0-255) for the UTF-8 encoding of `s`. Pure, deterministic, no training. |
 | `train_bpe(corpus, vocab_size, seed)` | 3 | Train a byte-level BPE tokenizer on a `Value::Str` (or already-byte-tokenized rank-1 array). Returns a `Value::Tokenizer`. Deterministic tie-breaking: on ties in merge count, the lexicographically smallest byte pair wins. |
 
+#### Format specs
+
+`format` follows Python's `str.format` mini-language. A field is
+`{` [position] [`:` spec] `}`; the spec reads
+`[[fill]align][sign][#][0][width][,][.precision][type]`.
+
+| Spec | Meaning | Example | Result |
+|------|---------|---------|--------|
+| `{}` / `{0}` | next argument / argument by position | `format("{1}-{0}", "a", "b")` | `b-a` |
+| `{:>8}` `{:<8}` `{:^8}` | right / left / center in width 8 | `format("[{:^7}]", "hi")` | `[  hi   ]` |
+| `{:*>6}` | fill character before the align | `format("{:*>6}", 42)` | `****42` |
+| `{:06}` / `{:=+6}` | zero-pad / pad after the sign | `format("{:06}", -42)` | `-00042` |
+| `{:d}` `{:4d}` | integer (non-integers error) | `format("{:4d}", 7)` | `   7` |
+| `{:+d}` `{: d}` | always sign / space for positive | `format("{:+d}", 5)` | `+5` |
+| `{:x}` `{:X}` `{:o}` `{:b}` | hex / octal / binary; `#` adds `0x` `0o` `0b` | `format("{:#x}", 255)` | `0xff` |
+| `{:.4f}` `{:8.2f}` | fixed point (6 digits by default) | `format("{:.4f}", 0.12345)` | `0.1235` |
+| `{:e}` `{:.2E}` | exponent | `format("{:.2e}", 12345)` | `1.23e+04` |
+| `{:g}` `{:.3g}` | general (shortest of `f` / `e`) | `format("{:.3g}", 0.00012345)` | `0.000123` |
+| `{:,}` | thousands separators | `format("{:,}", 1234567)` | `1,234,567` |
+| `{:.1%}` | percent | `format("{:.1%}", 0.256)` | `25.6%` |
+| `{{` `}}` | literal braces | `format("{{{}}}", 3)` | `{3}` |
+
+Without a type, a number displays as MLPL prints it (`5`, `2.5`) and
+aligns right; a string aligns left. A field and its argument are
+named in every error.
+
 ### Language Model Helpers
 
 | Function | Args | Description |

@@ -1,6 +1,6 @@
 number = 7
 slug = "relay-close"
-status = "pending"
+status = "in-progress"
 description = "readable-scripts step 6: lang-reference (format spec table, booleans in opera..."
 role = "production"
 context_files = []

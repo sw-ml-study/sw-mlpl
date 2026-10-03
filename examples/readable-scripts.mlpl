@@ -1,0 +1,49 @@
+# Readable scripts: the one-liners a Python developer reaches for.
+#
+#   format(template, args...)  Python str.format fields -> a string
+#   write(v, ...)              print without the newline (progress lines)
+#   str_concat(a, b, ...)      two or more strings
+#   and / or / not             Python precedence; short-circuit on scalars,
+#                              elementwise 0/1 masks on arrays
+#   {a, b: x} = record         destructuring (also `= f()?`)
+#
+# Run: mlpl-repl -f examples/readable-scripts.mlpl
+
+def u:fit_step(w, x, y, lr) {
+  "One gradient step of least squares y ~ w * x; returns the new weight and the loss."
+  err = w * x - y
+  loss = reduce_add(err * err) / reduce_add(x * 0 + 1)
+  g = 2 * reduce_add(err * x) / reduce_add(x * 0 + 1)
+  {w: w - lr * g, loss: loss}
+}
+
+def u:in_range(v, lo, hi) {
+  "0/1 mask of the entries of `v` inside [lo, hi] (NaN is never inside)."
+  v == v and v >= lo and v <= hi
+}
+
+# Fit y = 3x: destructure each step's record, report with format.
+x = [1, 2, 3, 4]
+y = 3 * x
+w = 0
+step = 0
+while step < 6 {
+  {w, loss} = u:fit_step(w, x, y, 0.05)
+  print(format("step {:2d} | w {:6.3f} | loss {:9.4f}", step, w, loss))
+  step = step + 1
+}
+
+# Short-circuit: the right side runs only when the left does not decide.
+i = 4
+safe = i < 4 and at(x, i) > 0
+print(format("index {} in range and positive: {}", i, safe))
+
+# Masks: and / or / not over arrays.
+readings = [12, 0 / 0, 31, -3, 47, 999]
+ok = u:in_range(readings, 0, 50)
+print(format("valid {} of {}: mean {:.2f}", reduce_add(ok), 6, reduce_add(compress(ok, readings)) / reduce_add(ok)))
+print(format("flagged: {}", not ok))
+
+# write builds a line from pieces; str_concat joins strings.
+write("labels: ", str_concat("train", "/", "val", "/", "test"), "\n")
+format("{:.1%} of readings kept", reduce_add(ok) / 6)

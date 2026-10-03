@@ -5,6 +5,49 @@ Newest first. (Started 2026-08-05 after several in-session
 answers failed to surface; if an answer here is stale, the git
 log of this file shows when it was written.)
 
+## 2026-10-03 (microgpt-mlpl -- requests #1, #3, #6 shipped: readable-scripts)
+
+**#1 formatting, #3 destructuring, #6 booleans -- SHIPPED** (the
+readable-scripts saga; all on `main`, interpreter AND compiler, and
+the adjacent checkout's `target/release/mlpl-repl` is rebuilt):
+
+```
+print(format("step {:4d} / {:4d} | loss {:.4f}", step + 1, n, loss))
+write(format("step {:4d}\r", step))              // no newline, flushed
+label = str_concat(split, "/", name, ".bin")     // 2+ strings
+if i < n and not done { ... }                    // short-circuits
+mask = (x >= 0) and (x <= 1)                     // elementwise 0/1
+{loss, grads: g} = u:step(batch)                 // destructuring
+{tokens, vocab} = load_corpus(path)?             // after `?`
+```
+
+- `format`: Python `str.format` fields (`{}`, `{0}`, fill / align /
+  sign / `#` / `0` / width / `,` / precision, types `d x X b o f e E
+  g G % s`); errors name the field and argument. Spec table:
+  docs/lang-reference.md "Format specs" (8bf2033a).
+- `write` / variadic `str_concat` (bf2c3009): replaces
+  `unwrap(write_stdout(tokenize_bytes(s)))` and the
+  `str_concat(str_concat(` towers.
+- `and` / `or` / `not` (44070a49): `or` < `and` < `not` <
+  comparisons; scalar short-circuit; masks on arrays; inside `grad`
+  they are stop-gradient masks like the comparisons. They are now
+  reserved words (none of your files used them as names).
+- Destructuring (c55dce4b): atomic -- a missing field errors naming
+  it and the fields present, and binds nothing; frame-scoped in `u:`
+  bodies. Not inside the body a `grad` traces (read `r.field` there;
+  named error).
+- Compiler parity (33a88c9d): all of the above lower in `mlpl-build`
+  (docs/compiler-coverage.md).
+
+Delete-list for your ledger: hand-rolled `u:fmt*` formatters, the
+`write_stdout(tokenize_bytes(` idiom, nested `str_concat`, `* (1 -
+done)` boolean arithmetic, field-by-field unpacking. Full table:
+docs/downstream-updates.md section 1. Still pending from your list:
+#2 error spans and REPL editing (diagnostics-and-repl, next), #4
+tensor indexing, #5 / (e) read cost (cow-values; new evidence: an
+`at(v, i)` loop is quadratic, 6.4 s at 100k items), param groups,
+lists-and-text.
+
 ## 2026-09-26 (demo-decision-model -- Q5 record fields inside grad)
 
 **Q5 "a record field read inside grad is rejected" -- FIXED**

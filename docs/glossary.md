@@ -86,7 +86,10 @@ and causally tested. Not in MLPL.
 APL's compress. The selection half of [[Rejection Sampling
 (best-of-N)]]: `compress(gt(scores, 0.9), C)` keeps exactly the
 candidates a verifier accepted, and the companion targets follow
-with the same mask.
+with the same mask. Selecting rows by KEY rather than by mask is
+`select_rows(table, keys)`: a record of equal-width rows looked up
+by a string list of keys, giving the `[N, C]` matrix (a categorical
+column to an attribute matrix in one call).
 
 
 ## dedupe_rows (builtin)
@@ -1229,7 +1232,12 @@ Elementwise predicates returning `0.0` / `1.0`: `gt(a, b)`,
 looser than arithmetic, so `sums == 3` is `eq(sums, 3)` and
 `a + b > c` is `(a + b) > c`. MLPL has no boolean type -- the
 `0 / 1` floats double as masks (multiply to filter) and
-counts (`reduce_add` to sum a "how many true" tally).
+counts (`reduce_add` to sum a "how many true" tally). The
+keywords `and` / `or` / `not` combine them with Python's
+precedence (`or` < `and` < `not` < comparisons): on scalars they
+short-circuit (`i < n and at(v, i) > 0` never reads past the
+end), on arrays they are elementwise 0/1 masks
+(`(x >= 0) and (x <= 1)`).
 
 ## Cross-attention
 
@@ -1757,9 +1765,13 @@ weight update is suppressed. MLPL: `freeze(model)` /
 ## String operations (builtins)
 
 Strings are a first-class value kind, built and taken apart with
-dedicated builtins (there is no `s[i]` indexing syntax). `str_concat(a, b)`
-joins two strings and `str_join(parts, sep)` joins a string list
-with a separator (the O(total) linear fold). `to_string(x)` renders a
+dedicated builtins (there is no `s[i]` indexing syntax). `str_concat(a, b, ...)`
+joins two or more strings and `str_join(parts, sep)` joins a string list
+with a separator (the O(total) linear fold). `format(template, args...)`
+builds a string from Python `str.format` fields -- `{}`, `{0}`,
+`{:>8}`, `{:4d}`, `{:.4f}`, `{:e}`, `{:,}`, `{:.1%}` -- so numbers
+mix into text without conversions: `format("step {:4d} | loss {:.4f}",
+step, loss)`. `to_string(x)` renders a
 scalar number as its shortest round-trip decimal (the inverse of
 `to_number`). Taking a string apart is CHARACTER-based, not byte-based:
 `str_len(s)` counts characters, not bytes (a multi-byte UTF-8
@@ -2678,7 +2690,11 @@ and stderr respectively, followed by a newline. Both return
 value, without needing a separate sequencing block. Same
 display contract as the REPL prompt -- a vector prints as
 `1 2 3`, a matrix as space-and-newline-delimited rows, a
-`[[Result type]]` as `Ok(...)` / `Err(...)`.
+`[[Result type]]` as `Ok(...)` / `Err(...)`. Several
+arguments print space-separated: `print("loss", loss)`.
+`write(v, ...)` is the no-newline sibling: the arguments'
+display forms concatenated, written and flushed, so
+`write(format("step {:4d}\r", step))` redraws one progress line.
 
 Driving use case: `mlpl-repl -f script.mlpl` only displays
 the script's FINAL expression by default; `print()` is how a
@@ -3383,10 +3399,13 @@ Vision [[Transformer]] track wants
 `{X: [200, 3, 64, 64], Y: [200], names: [str]}` -- one builtin,
 three logical outputs, no positional-tuple awkwardness.
 
-Out of scope for the initial step: record destructuring in
-let-bindings (`let {X, Y} = r`), record-update / spread syntax
-(`{..r, X: new_x}`), pattern matching on records. Each is a
-separate follow-up if a use case appears.
+Destructuring binds fields to variables in one statement:
+`{X, Y} = r` binds `X = r.X` and `Y = r.Y`, `{loss: l} = r` binds
+field `loss` to `l`, and `{X, Y} = load(p)?` unwraps a Result
+first. Unnamed fields are ignored; a missing field is an error that
+names it and binds nothing. Record-update / spread syntax
+(`{..r, X: new_x}`) and pattern matching on records are not
+supported.
 
 ## Recursion
 

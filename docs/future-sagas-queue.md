@@ -28,6 +28,20 @@ data-forge (Track 1).
 
 ## Recently shipped
 
+- **readable-scripts** -- SHIPPED 2026-10-03 (7 steps; first saga of the
+  Python-ML-developer ergonomics program, microgpt-mlpl requests #1 / #3
+  / #6). `format(template, args...)` (Python format specs, the pure
+  `mlpl-format` crate shared by interpreter and compiler runtime);
+  `write(v, ...)` and variadic `str_concat`; `and` / `or` / `not`
+  keywords (Python precedence, scalar short-circuit, masks, stop-gradient
+  in grad); record destructuring `{a, b: x} = r` (atomic, frame-scoped);
+  compiler parity for all of it (`Arity::AtLeast` + `CvalVariadic`
+  registry rows, `lower_binop` short-circuit); a transducers literate doc
+  (user request) whose gaps were queued (`else if`, `max` / `min`,
+  quadratic `at(v, i)` loops -> cow-values evidence); mlpl-mode
+  highlights every keyword. Owed tech debt: split `mlpl-lower-rs` (crate
+  at the 7-module ceiling, `lower_fncall` 222 LOC) before the next
+  compiler feature -- queued under Maintenance.
 - **grad-soundness-records** -- SHIPPED 2026-09-26 (12 steps; started as
   demo-decision-model Q5, absorbed microgpt-mlpl a-j + requests #10,
   reasoning-from-scratch R11, demo-extensions R1/R2). grad no longer folds
@@ -186,7 +200,8 @@ coming from Python trips over first. Runs AFTER grad-soundness-records
 closes (its 006 layer-weights-api and 008 gather-node feed sagas 3-4;
 its 007 frame-snapshot-cost is the narrow half of request 5 / issue e).
 
-1. **readable-scripts** -- `format(template, args...)` with a Python
+1. **readable-scripts** -- SHIPPED 2026-10-03 (see Recently shipped).
+   `format(template, args...)` with a Python
    format-spec subset (`{}`, `{:4d}`, `{:.4f}`, `{:>8}`, `{:x}`;
    lowers to Rust `format!`); `write(s)` (no
    `unwrap(write_stdout(tokenize_bytes(s)))`); variadic `str_concat`;
@@ -629,6 +644,16 @@ in data-forge come first).
 
 ## Maintenance items
 
+- **mlpl-lower-rs split** (owed by readable-scripts, 2026-10-03; do
+  BEFORE the next compiler feature) -- the crate sits at the 7-module
+  ceiling, `fncall.rs::lower_fncall` is 222 LOC (FAIL) and
+  `lower.rs::lower_expr` 71 (FAIL); readable-scripts steps 005 had to
+  add to already-warned modules (+5 warnings, exception trailer). Split
+  the builtin registry + emitters into a sibling crate (the registry is
+  data; emitters take a lowering callback) and move the per-`Emit`
+  arms into named functions so `lower_fncall` is a dispatch table.
+  Same pressure on `mlpl-rt-value` (7 modules): give the text helpers
+  (`format`, `str_concat`, `disp`, `to_int`) their own crate.
 - **stale grad-of-eager-loss tests** (found 2026-09-22; fail on the
   unmodified tree) -- `auto_tag_tests::grad_tags_result_as_gradient_with_wrt_name`
   and `typed_values_lesson_smoke::lesson_step_4_grad_produces_gradient_with_wrt`

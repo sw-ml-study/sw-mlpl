@@ -1164,3 +1164,36 @@ each shipped change to the workaround it retires, plus the house
 style for idiomatic MLPL. The triage of microgpt-mlpl's thirteen
 design requests became the next program: six sagas of
 Python-developer ergonomics, starting with readable-scripts.
+
+## Saga: readable-scripts -- the obvious one-liner, in both runtimes (COMPLETE, 2026-10-03)
+
+The first saga of the Python-ML-developer ergonomics program, aimed at
+what a Python developer types without thinking. Its evidence was a
+count over 1,658 downstream scripts: 2,901 `str_concat(` calls and 269
+lines nesting them, booleans spelled as `* (1 - done)`, records
+unpacked field by field. `format(template, args...)` brought Python's
+format mini-language (fill, alignment, sign, width, grouping,
+precision, the `d x b o f e g %` types) as a pure crate, so the
+interpreter and the compiled runtime format identically; `write` gave
+`print` its no-newline sibling for progress lines, and `str_concat`
+became variadic. `and` / `or` / `not` became keywords with Python's
+precedence: on scalars they short-circuit, so `i < n and at(v, i) > 0`
+never reads past the end, on arrays they are elementwise masks, and
+inside `grad` they are stop-gradient masks like the comparisons.
+Record destructuring -- `{loss, grads: g} = u:step(b)`, also after
+`?` -- is atomic: a missing field names itself and binds nothing.
+
+A compiler-parity step lowered all of it to Rust: one variadic emit
+shape and an at-least arity in the builtin registry, the binary
+operators moved into a helper that keeps the short-circuit (proven by
+a compiled binary in which a `write` behind a decided `and` must not
+run), and destructuring as a record temporary with one binding per
+field. The compiler crate reached its module ceiling doing so; its
+split is the first maintenance item. A user request added a literate
+document on Clojure's transducers, built without closures from
+partial application and three-step reducer records; writing it found
+three ergonomic gaps (`else if`, `max` / `min`, `for` over string
+lists) and the strongest evidence yet for copy-on-write values: an
+element-at-a-time loop over one array is quadratic, 6.4 s at 100,000
+items against 0.28 s in chunks. Next per the queue:
+diagnostics-and-repl.

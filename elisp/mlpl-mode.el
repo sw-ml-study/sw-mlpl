@@ -44,8 +44,10 @@
   :group 'mlpl)
 
 (defvar mlpl--keywords
-  '("repeat" "train")
-  "MLPL reserved keywords.")
+  '("repeat" "train" "for" "in" "experiment" "device"
+    "if" "else" "while" "break" "continue" "try" "catch"
+    "def" "return" "and" "or" "not")
+  "MLPL reserved keywords (the lexer's keyword table, `TokenKind::keyword').")
 
 (defvar mlpl--context-keywords
   '("param" "tensor")
